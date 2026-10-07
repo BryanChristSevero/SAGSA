@@ -1,4 +1,4 @@
-package bryan.david_.sagsa;
+package bryan.david.sagsa;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
