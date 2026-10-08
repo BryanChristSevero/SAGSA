@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.hibernate.validator.constraints.EAN;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,6 +17,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -31,33 +33,24 @@ import lombok.Setter;
 @EqualsAndHashCode
 public class Modulo {
 
-public static final String TABLE_NAME = "modulo"; 
+public static final String TABLE_NAME = "modulo";
 
-@ManyToOne
-@JoinColumn(name = "id_modulo", nullable = false)
-private Modulo modulo;
+//Atributos
 
-@OneToMany(mappedBy = "sapz", cascade = CascadeType.ALL)
-private List<Atividade> atividades = new ArrayList<>();
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+@Column(name = "id_modulo")
+private Long id;
 
-//Tabela Associativa SAPZ_Capacidade
-@ManyToMany
-@JoinTable(
-    name = "sapz_capacidade",
-    joinColumns = @JoinColumn(name = "id_sapz"),
-    inverseJoinColumns = @JoinColumn(name = "id_capacidade"))
-    
-    private List<Capacidade> capacidades = new ArrayList<>();
+@NotNull
+@Size(min = 1, max = 100)
+@Column(length = 100)
+private String nomeModulo;
 
-//Tabela Associativa SAPZ_Criterio_Avaliacao
-
-@ManyToMany
-@JoinTable(
-    name = "sapz_criterio",
-    joinColumns = @JoinColumn(name = "id_sapz"),
-    inverseJoinColumns = @JoinColumn(name = "id_criterio"))
-
-    private List<CriterioAvaliacao> criterios = new ArrayList<>();
+@NotNull
+@Size(min = 1, max = 100)
+@Column(length = 100)
+private String descricao;
 
 //Chaves Estrangeiras 
 

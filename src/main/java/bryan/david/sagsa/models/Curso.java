@@ -15,24 +15,29 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = "id")
 public class Curso {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_curso")
-    private Long id;
 
-    @NotBlank
-    @Column(name = "nome_curso", nullable = false, length = 150)
-    private String nomeCurso;
+//Atributos
 
-    @NotBlank
-    @Column(name = "eixo_tecnologico", nullable = false, length = 100)
-    private String eixoTecnologico;
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+@Column(name = "id_curso")
+private Long id;
 
-    @NotNull
-    @Column(name = "carga_horaria_total", nullable = false)
-    private Integer cargaHorariaTotal;
+@NotNull
+@Column(name = "nome_curso", nullable = false, length = 150)
+private String nomeCurso;
 
-    @OneToMany(mappedBy = "curso")
-    private List<Ppc> ppcs = new ArrayList<>();
+@NotNull
+@Column(name = "eixo_tecnologico", nullable = false, length = 100)
+private String eixoTecnologico;
+
+@NotNull
+@Column(name = "carga_horaria_total", nullable = false)
+private Integer cargaHorariaTotal;
+
+//Chaves Estrangeiras
+
+@OneToMany(mappedBy = "curso")
+private List<Ppc> ppcs = new ArrayList<>();
+
 }

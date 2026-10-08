@@ -14,19 +14,25 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = "id")
 public class Ppc {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_ppc")
-    private Long id;
 
-    @NotNull
-    @Column(name = "ano_vigencia", nullable = false)
-    private Integer anoVigencia;
+//Atributos
 
-    @ManyToOne
-    @JoinColumn(name = "id_curso", nullable = false)
-    private Curso curso;
+@Id
+@GeneratedValue(strategy = GenerationType.IDENTITY)
+@Column(name = "id_ppc")
+private Long id;
 
-    @OneToMany(mappedBy = "ppc")
-    private List<Modulo> modulos = new ArrayList<>();
+@NotNull
+@Column(name = "ano_vigencia", nullable = false)
+private Integer anoVigencia;
+
+//Chaves Estrangeiras
+
+@ManyToOne
+@JoinColumn(name = "id_curso", nullable = false)
+private Curso curso;
+
+@OneToMany(mappedBy = "ppc")
+private List<Modulo> modulos = new ArrayList<>();
+
 }
