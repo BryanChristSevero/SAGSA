@@ -1,4 +1,4 @@
 package bryan.david.sagsa.repositories;
 
-public class SapzRepositories {
+public class UsuarioRepository {
 }
