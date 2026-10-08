@@ -9,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -40,5 +42,11 @@ private Long id;
 @Size(min = 1, max = 100)
 @Column(length = 100)
 private String descricao;
+
+//Chaves Estrangeiras
+
+@ManyToOne 
+@JoinColumn(name = "id_capacidade", nullable = false)
+private Capacidade capacidade;
     
 }

@@ -3,6 +3,8 @@ package bryan.david.sagsa.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -52,6 +54,15 @@ public class Usuario {
     @Column(name = "senha_usuario")
     @NotNull
     private String senha;
+
+    public enum TipoPerfil {
+    ROLE_DOCENTE,
+    ROLE_ADMIN
+    }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo_perfil", nullable = false)
+    private TipoPerfil tipoPerfil;
 
     @OneToMany(mappedBy = "usuario")
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)

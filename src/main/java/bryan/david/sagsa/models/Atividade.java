@@ -9,7 +9,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -37,13 +40,17 @@ public static final String TABLE_NAME = "atividade";
 private Long id;
 
 @NotNull
-@Size(min = 1, max = 100)
-@Column(length = 100)
-private String descricao;
+@Column(name = "descricao_atividade", columnDefinition = "TEXT", nullable = false)
+private String descricaoAtividade;
 
 @NotNull
 @Column(name = "carga_horaria", nullable = false)
 private Integer cargaHoraria;
 
-    
+//Chaves Estrangeiras
+
+@ManyToOne
+@JoinColumn(name = "id_sapz", nullable = false)
+private Sapz sapz;
+
 }
