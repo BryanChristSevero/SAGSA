@@ -15,6 +15,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(of = "id")
 public class Curso {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_curso")
