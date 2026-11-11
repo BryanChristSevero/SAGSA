@@ -3,11 +3,9 @@ package bryan.david.sagsa.security;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import bryan.david.sagsa.models.Usuario;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class UserSpringSecurity implements UserDetails {
 
@@ -20,8 +18,10 @@ public class UserSpringSecurity implements UserDetails {
         this.id = id;
         this.email = email;
         this.senha = senha;
-        // Atribui a permissão com base no perfil do utilizador (ex: ROLE_INSTRUTOR, ROLE_ADMINISTRADOR)
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + perfilNome));
+        
+        // Garante que se o perfil vier nulo, define uma role padrão para evitar erros
+        String role = (perfilNome != null && !perfilNome.isBlank()) ? perfilNome : "USER";
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
     }
 
     public Long getId() {
@@ -44,14 +44,22 @@ public class UserSpringSecurity implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 }

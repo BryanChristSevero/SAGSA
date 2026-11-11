@@ -1,7 +1,9 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.Sapz;
-import bryan.david.sagsa.repositories.SapzRepository;
+import bryan.david.sagsa.dtos.SapzRequestDTO;
+import bryan.david.sagsa.dtos.SapzResponseDTO;
+import bryan.david.sagsa.services.SapzService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +16,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SapzController {
 
-    private final SapzRepository sapzRepository;
+    private final SapzService sapzService;
 
     @GetMapping
-    public ResponseEntity<List<Sapz>> listarTodas() {
-        return ResponseEntity.ok(sapzRepository.findAll());
+    public ResponseEntity<List<SapzResponseDTO>> listarTodas() {
+        return ResponseEntity.ok(sapzService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Sapz> buscarPorId(@PathVariable Long id) {
-        return sapzRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<SapzResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(sapzService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Sapz> criar(@RequestBody Sapz sapz) {
-        Sapz nova = sapzRepository.save(sapz);
+    public ResponseEntity<SapzResponseDTO> criar(@Valid @RequestBody SapzRequestDTO dto) {
+        SapzResponseDTO nova = sapzService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nova);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!sapzRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        sapzRepository.deleteById(id);
+        sapzService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }
