@@ -1,7 +1,8 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.Atividade;
-import bryan.david.sagsa.repositories.AtividadeRepository;
+import bryan.david.sagsa.models.dtos.AtividadeDTOs;
+import bryan.david.sagsa.services.AtividadeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +15,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AtividadeController {
 
-    private final AtividadeRepository atividadeRepository;
+    private final AtividadeService atividadeService;
 
     @GetMapping
-    public ResponseEntity<List<Atividade>> listarTodas() {
-        return ResponseEntity.ok(atividadeRepository.findAll());
+    public ResponseEntity<List<AtividadeDTOs.Response>> listarTodas() {
+        return ResponseEntity.ok(atividadeService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Atividade> buscarPorId(@PathVariable Long id) {
-        return atividadeRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<AtividadeDTOs.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(atividadeService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Atividade> criar(@RequestBody Atividade atividade) {
-        Atividade nova = atividadeRepository.save(atividade);
-        return ResponseEntity.status(HttpStatus.CREATED).body(nova);
+    public ResponseEntity<AtividadeDTOs.Response> criar(@Valid @RequestBody AtividadeDTOs.Request dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(atividadeService.criar(dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!atividadeRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        atividadeRepository.deleteById(id);
+        atividadeService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }

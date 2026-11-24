@@ -1,9 +1,5 @@
 package bryan.david.sagsa.models;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.*;
-import jakarta.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,27 +22,22 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 public class CriterioAvaliacao {
 
-public static final String TABLE_NAME = "criterio";
+    public static final String TABLE_NAME = "criterio";
 
-//Atributos
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_criterio")
+    private Long id;
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-@Column(name = "id_criterio")
-private Long id;
+    @NotNull
+    @Size(min = 1, max = 255)
+    @Column(length = 255)
+    private String descricao;
 
-@NotNull
-@Size(min = 1, max = 100)
-@Column(length = 100)
-private String descricao;
-
-//Chaves Estrangeiras
-
-@ManyToOne 
-@JoinColumn(name = "id_capacidade", nullable = false)
-private Capacidade capacidade;
-    
+    @ManyToOne 
+    @JoinColumn(name = "id_capacidade", nullable = false)
+    private Capacidade capacidade;
 }

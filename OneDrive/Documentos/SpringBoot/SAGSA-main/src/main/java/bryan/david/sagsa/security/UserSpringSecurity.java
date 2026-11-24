@@ -20,8 +20,8 @@ public class UserSpringSecurity implements UserDetails {
         this.senha = senha;
         
         // Garante que se o perfil vier nulo, define uma role padrão para evitar erros
-        String role = (perfilNome != null && !perfilNome.isBlank()) ? perfilNome : "USER";
-        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+        String role = (perfilNome != null && !perfilNome.isBlank()) ? perfilNome : "ROLE_DOCENTE";
+        this.authorities = List.of(new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role));
     }
 
     public Long getId() {

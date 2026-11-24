@@ -3,7 +3,7 @@ package bryan.david.sagsa.services;
 import bryan.david.sagsa.models.Usuario;
 import bryan.david.sagsa.repositories.UsuarioRepository;
 import bryan.david.sagsa.security.UserSpringSecurity;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -12,14 +12,13 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Assume que existe um método no UsuarioRepository para buscar por email
         Optional<Usuario> usuarioOpt = usuarioRepository.findByEmail(email);
         
         if (usuarioOpt.isEmpty()) {
@@ -27,9 +26,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         Usuario usuario = usuarioOpt.get();
-        // Como o modelo do DDL usa relacionamento com perfis, ajustamos conforme o objeto
-        String perfilNome = usuario.getPerfil() != null ? usuario.getPerfil().getNome() : "USER";
+        
+        // Extrai o nome do Enum TipoPerfil (ex: "ROLE_DOCENTE" ou "ROLE_ADMIN")
+        String perfilNome = usuario.getTipoPerfil() != null ? usuario.getTipoPerfil().name() : "ROLE_DOCENTE";
 
-        return new UserSpringSecurity(usuario.getId(), usuario.getEmail(), usuario.getSenhaHash(), perfilNome);
+        return new UserSpringSecurity(
+                usuario.getIdUsuario(), 
+                usuario.getEmail(), 
+                usuario.getSenha(), 
+                perfilNome
+        );
     }
 }

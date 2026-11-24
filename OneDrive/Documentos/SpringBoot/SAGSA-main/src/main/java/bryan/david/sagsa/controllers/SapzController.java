@@ -1,7 +1,7 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.dtos.SapzRequestDTO;
-import bryan.david.sagsa.dtos.SapzResponseDTO;
+import bryan.david.sagsa.models.dtos.SapzRequestDTO;
+import bryan.david.sagsa.models.dtos.SapzResponseDTO;
 import bryan.david.sagsa.services.SapzService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

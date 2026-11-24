@@ -1,7 +1,8 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.CriterioAvaliacao;
-import bryan.david.sagsa.repositories.CriterioAvaliacaoRepository;
+import bryan.david.sagsa.models.dtos.CriterioAvaliacaoDTOs;
+import bryan.david.sagsa.services.CriterioAvaliacaoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +15,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CriterioAvaliacaoController {
 
-    private final CriterioAvaliacaoRepository criterioRepository;
+    private final CriterioAvaliacaoService criterioService;
 
     @GetMapping
-    public ResponseEntity<List<CriterioAvaliacao>> listarTodos() {
-        return ResponseEntity.ok(criterioRepository.findAll());
+    public ResponseEntity<List<CriterioAvaliacaoDTOs.Response>> listarTodos() {
+        return ResponseEntity.ok(criterioService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CriterioAvaliacao> buscarPorId(@PathVariable Long id) {
-        return criterioRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CriterioAvaliacaoDTOs.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(criterioService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<CriterioAvaliacao> criar(@RequestBody CriterioAvaliacao criterio) {
-        CriterioAvaliacao novo = criterioRepository.save(criterio);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novo);
+    public ResponseEntity<CriterioAvaliacaoDTOs.Response> criar(@Valid @RequestBody CriterioAvaliacaoDTOs.Request dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(criterioService.criar(dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!criterioRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        criterioRepository.deleteById(id);
+        criterioService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -1,7 +1,8 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.Capacidade;
-import bryan.david.sagsa.repositories.CapacidadeRepository;
+import bryan.david.sagsa.models.dtos.CapacidadeDTOs;
+import bryan.david.sagsa.services.CapacidadeService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +15,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CapacidadeController {
 
-    private final CapacidadeRepository capacidadeRepository;
+    private final CapacidadeService capacidadeService;
 
     @GetMapping
-    public ResponseEntity<List<Capacidade>> listarTodas() {
-        return ResponseEntity.ok(capacidadeRepository.findAll());
+    public ResponseEntity<List<CapacidadeDTOs.Response>> listarTodas() {
+        return ResponseEntity.ok(capacidadeService.listarTodas());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Capacidade> buscarPorId(@PathVariable Long id) {
-        return capacidadeRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CapacidadeDTOs.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(capacidadeService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Capacidade> criar(@RequestBody Capacidade capacidade) {
-        Capacidade nova = capacidadeRepository.save(capacidade);
+    public ResponseEntity<CapacidadeDTOs.Response> criar(@Valid @RequestBody CapacidadeDTOs.Request dto) {
+        CapacidadeDTOs.Response nova = capacidadeService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(nova);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!capacidadeRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        capacidadeRepository.deleteById(id);
+        capacidadeService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }

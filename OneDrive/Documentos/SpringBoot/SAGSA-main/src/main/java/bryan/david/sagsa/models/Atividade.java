@@ -1,9 +1,5 @@
 package bryan.david.sagsa.models;
 
-import java.util.ArrayList;
-import java.util.List;
-import lombok.*;
-import jakarta.*;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -12,9 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,30 +21,25 @@ import lombok.Setter;
 @NoArgsConstructor
 @Setter
 @Getter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 public class Atividade {
 
-public static final String TABLE_NAME = "atividade";
+    public static final String TABLE_NAME = "atividade";
 
-//Atributos
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_atividade")
+    private Long id;
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-@Column(name = "id_atividade")
-private Long id;
+    @NotNull
+    @Column(name = "descricao_atividade", columnDefinition = "TEXT", nullable = false)
+    private String descricaoAtividade;
 
-@NotNull
-@Column(name = "descricao_atividade", columnDefinition = "TEXT", nullable = false)
-private String descricaoAtividade;
+    @NotNull
+    @Column(name = "carga_horaria", nullable = false)
+    private Integer cargaHoraria;
 
-@NotNull
-@Column(name = "carga_horaria", nullable = false)
-private Integer cargaHoraria;
-
-//Chaves Estrangeiras
-
-@ManyToOne
-@JoinColumn(name = "id_sapz", nullable = false)
-private Sapz sapz;
-
+    @ManyToOne
+    @JoinColumn(name = "id_sapz", nullable = false)
+    private Sapz sapz;
 }

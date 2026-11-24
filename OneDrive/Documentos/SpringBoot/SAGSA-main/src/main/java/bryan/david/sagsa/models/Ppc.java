@@ -15,24 +15,19 @@ import java.util.List;
 @EqualsAndHashCode(of = "id")
 public class Ppc {
 
-//Atributos
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_ppc")
+    private Long id;
 
-@Id
-@GeneratedValue(strategy = GenerationType.IDENTITY)
-@Column(name = "id_ppc")
-private Long id;
+    @NotNull
+    @Column(name = "ano_vigencia", nullable = false)
+    private Integer anoVigencia;
 
-@NotNull
-@Column(name = "ano_vigencia", nullable = false)
-private Integer anoVigencia;
+    @ManyToOne
+    @JoinColumn(name = "id_curso", nullable = false)
+    private Curso curso;
 
-//Chaves Estrangeiras
-
-@ManyToOne
-@JoinColumn(name = "id_curso", nullable = false)
-private Curso curso;
-
-@OneToMany(mappedBy = "ppc")
-private List<Modulo> modulos = new ArrayList<>();
-
+    @OneToMany(mappedBy = "ppc", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Modulo> modulos = new ArrayList<>();
 }

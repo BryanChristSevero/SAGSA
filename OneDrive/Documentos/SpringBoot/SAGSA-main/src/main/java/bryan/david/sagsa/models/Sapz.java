@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +16,10 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
+@EqualsAndHashCode(of = "id")
 public class Sapz {
-    public interface criarSapz {
-    }
-
-    public interface editarSapz {
-    }
 
     public static final String TABLE_NAME = "sapz";
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,15 +31,14 @@ public class Sapz {
     private String titulo;
 
     @NotNull
-    @Size(min = 1, max = 100)
-    @Column(length = 100)
+    @Size(min = 1, max = 255)
+    @Column(length = 255)
     private String descricao;
 
     @NotNull
-    @Size(min = 1, max = 100)
-    @Column(length = 100)
-    private String curso;
-
+    @Size(min = 1, max = 255)
+    @Column(length = 255)
+    private String desafio;
 
     @NotNull
     @Column(name = "data_geracao")
@@ -57,8 +49,15 @@ public class Sapz {
     private Integer cargaHorariaTotal;
 
     @ManyToOne
+    @JoinColumn(name = "id_modulo", nullable = false)
+    private Modulo modulo;
+
+    @ManyToOne
     @JoinColumn(name = "usuario_id", nullable = false, updatable = false)
     private Usuario usuario;
+
+    @OneToMany(mappedBy = "sapz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Atividade> atividades = new ArrayList<>();
 }
 
 

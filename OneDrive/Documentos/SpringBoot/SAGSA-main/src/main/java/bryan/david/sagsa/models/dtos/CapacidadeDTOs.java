@@ -6,14 +6,11 @@ import jakarta.validation.constraints.NotNull;
 public class CapacidadeDTOs {
 
     public record Request(
-        @NotNull(message = "ID da unidade curricular obrigatório")
-        Long unidadeCurricularId,
+        @NotNull(message = "ID do módulo é obrigatório")
+        Long idModulo,
 
         @NotBlank(message = "O tipo da capacidade é obrigatório")
-        String tipo,
-
-        @NotBlank(message = "O domínio é obrigatório")
-        String dominio,
+        String tipoCapacidade,
 
         @NotBlank(message = "A descrição é obrigatória")
         String descricao
@@ -21,8 +18,8 @@ public class CapacidadeDTOs {
 
     public record Response(
         Long id,
-        String tipo,
-        String dominio,
-        String descricao
+        String tipoCapacidade,
+        String descricao,
+        Long idModulo
     ) {}
 }

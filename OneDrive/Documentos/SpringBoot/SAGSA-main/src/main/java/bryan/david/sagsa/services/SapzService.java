@@ -1,20 +1,19 @@
 package bryan.david.sagsa.services;
 
-import bryan.david.sagsa.dtos.SapzRequestDTO;
-import bryan.david.sagsa.dtos.SapzResponseDTO;
+import bryan.david.sagsa.exceptions.ObjectNotFoundException;
+import bryan.david.sagsa.models.Modulo;
 import bryan.david.sagsa.models.Sapz;
-import bryan.david.sagsa.models.Turma;
-import bryan.david.sagsa.models.UnidadeCurricular;
 import bryan.david.sagsa.models.Usuario;
+import bryan.david.sagsa.models.dtos.SapzRequestDTO;
+import bryan.david.sagsa.models.dtos.SapzResponseDTO;
+import bryan.david.sagsa.repositories.ModuloRepository;
 import bryan.david.sagsa.repositories.SapzRepository;
-import bryan.david.sagsa.repositories.TurmaRepository;
-import bryan.david.sagsa.repositories.UnidadeCurricularRepository;
 import bryan.david.sagsa.repositories.UsuarioRepository;
-import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -22,9 +21,8 @@ import java.util.List;
 public class SapzService {
 
     private final SapzRepository sapzRepository;
-    private final UnidadeCurricularRepository unidadeCurricularRepository;
+    private final ModuloRepository moduloRepository;
     private final UsuarioRepository usuarioRepository;
-    private final TurmaRepository turmaRepository; // Opcional, caso use turmas
 
     @Transactional(readOnly = true)
     public List<SapzResponseDTO> listarTodas() {
@@ -36,35 +34,26 @@ public class SapzService {
     @Transactional(readOnly = true)
     public SapzResponseDTO buscarPorId(Long id) {
         Sapz sapz = sapzRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("SAPZ não encontrada com o ID: " + id));
+                .orElseThrow(() -> new ObjectNotFoundException("SAPZ não encontrada com ID: " + id));
         return toResponseDTO(sapz);
     }
 
     @Transactional
     public SapzResponseDTO criar(SapzRequestDTO dto) {
-        UnidadeCurricular uc = unidadeCurricularRepository.findById(dto.unidadeCurricularId())
-                .orElseThrow(() -> new EntityNotFoundException("Unidade Curricular não encontrada"));
+        Modulo modulo = moduloRepository.findById(dto.idModulo())
+                .orElseThrow(() -> new ObjectNotFoundException("Módulo não encontrado com ID: " + dto.idModulo()));
 
-        Usuario instrutor = usuarioRepository.findById(dto.instrutorId())
-                .orElseThrow(() -> new EntityNotFoundException("Instrutor não encontrado"));
-
-        Turma turma = null;
-        if (dto.turmaId() != null) {
-            turma = turmaRepository.findById(dto.turmaId())
-                    .orElseThrow(() -> new EntityNotFoundException("Turma não encontrada"));
-        }
+        Usuario usuario = usuarioRepository.findById(dto.usuarioId())
+                .orElseThrow(() -> new ObjectNotFoundException("Usuário não encontrado com ID: " + dto.usuarioId()));
 
         Sapz sapz = new Sapz();
         sapz.setTitulo(dto.titulo());
-        sapz.setUnidadeCurricular(uc);
-        sapz.setInstrutor(instrutor);
-        sapz.setTurma(turma);
-        sapz.setTipoEstrategia(dto.tipoEstrategia());
-        sapz.setContextualizacao(dto.contextualizacao());
+        sapz.setDescricao(dto.descricao());
         sapz.setDesafio(dto.desafio());
-        sapz.setResultadosEsperados(dto.resultadosEsperados());
-        sapz.setCargaHorariaSa(dto.cargaHorariaSa());
-        sapz.setCompartilhada(false);
+        sapz.setCargaHorariaTotal(dto.cargaHorariaTotal());
+        sapz.setDataGeracao(LocalDateTime.now());
+        sapz.setModulo(modulo);
+        sapz.setUsuario(usuario);
 
         Sapz salva = sapzRepository.save(sapz);
         return toResponseDTO(salva);
@@ -73,24 +62,21 @@ public class SapzService {
     @Transactional
     public void deletar(Long id) {
         if (!sapzRepository.existsById(id)) {
-            throw new EntityNotFoundException("SAPZ não encontrada com o ID: " + id);
+            throw new ObjectNotFoundException("SAPZ não encontrada com ID: " + id);
         }
         sapzRepository.deleteById(id);
     }
 
     private SapzResponseDTO toResponseDTO(Sapz sapz) {
-        String nomeInstrutor = sapz.getInstrutor() != null ? sapz.getInstrutor.getNome() : null;
+        String nomeUsuario = sapz.getUsuario() != null ? sapz.getUsuario().getNome() : null;
         return new SapzResponseDTO(
                 sapz.getId(),
                 sapz.getTitulo(),
-                sapz.getTipoEstrategia(),
-                sapz.getContextualizacao(),
+                sapz.getDescricao(),
                 sapz.getDesafio(),
-                sapz.getResultadosEsperados(),
-                sapz.getCargaHorariaSa(),
-                sapz.getCompartilhada(),
-                nomeInstrutor,
-                sapz.getDataCriacao()
+                sapz.getDataGeracao(),
+                sapz.getCargaHorariaTotal(),
+                nomeUsuario
         );
     }
 }

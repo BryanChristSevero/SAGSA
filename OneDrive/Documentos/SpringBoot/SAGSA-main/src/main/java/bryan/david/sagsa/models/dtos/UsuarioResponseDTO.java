@@ -1,9 +1,10 @@
-package bryan.david.sagsa.dtos;
+package bryan.david.sagsa.models.dtos;
+
+import bryan.david.sagsa.models.Usuario;
 
 public record UsuarioResponseDTO(
-    Long id,
+    Long idUsuario,
     String nome,
     String email,
-    String perfilNome,
-    Boolean ativo
+    Usuario.TipoPerfil tipoPerfil
 ) {}

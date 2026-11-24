@@ -1,7 +1,8 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.Ppc;
-import bryan.david.sagsa.repositories.PpcRepository;
+import bryan.david.sagsa.models.dtos.PpcDTOs;
+import bryan.david.sagsa.services.PpcService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +15,26 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PpcController {
 
-    private final PpcRepository ppcRepository;
+    private final PpcService ppcService;
 
     @GetMapping
-    public ResponseEntity<List<Ppc>> listarTodos() {
-        return ResponseEntity.ok(ppcRepository.findAll());
+    public ResponseEntity<List<PpcDTOs.Response>> listarTodos() {
+        return ResponseEntity.ok(ppcService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Ppc> buscarPorId(@PathVariable Long id) {
-        return ppcRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<PpcDTOs.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(ppcService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Ppc> criar(@RequestBody Ppc ppc) {
-        Ppc novo = ppcRepository.save(ppc);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novo);
+    public ResponseEntity<PpcDTOs.Response> criar(@Valid @RequestBody PpcDTOs.Request dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ppcService.criar(dto));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!ppcRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        ppcRepository.deleteById(id);
+        ppcService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }
