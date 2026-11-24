@@ -1,7 +1,8 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.models.Curso;
-import bryan.david.sagsa.repositories.CursoRepository;
+import bryan.david.sagsa.models.dtos.CursoDTOs;
+import bryan.david.sagsa.services.CursoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,32 +15,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CursoController {
 
-    private final CursoRepository cursoRepository;
+    private final CursoService cursoService;
 
     @GetMapping
-    public ResponseEntity<List<Curso>> listarTodos() {
-        return ResponseEntity.ok(cursoRepository.findAll());
+    public ResponseEntity<List<CursoDTOs.Response>> listarTodos() {
+        return ResponseEntity.ok(cursoService.listarTodos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Curso> buscarPorId(@PathVariable Long id) {
-        return cursoRepository.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<CursoDTOs.Response> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(cursoService.buscarPorId(id));
     }
 
     @PostMapping
-    public ResponseEntity<Curso> criar(@RequestBody Curso curso) {
-        Curso novo = cursoRepository.save(curso);
+    public ResponseEntity<CursoDTOs.Response> criar(@Valid @RequestBody CursoDTOs.Request dto) {
+        CursoDTOs.Response novo = cursoService.criar(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(novo);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        if (!cursoRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        cursoRepository.deleteById(id);
+        cursoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
 }

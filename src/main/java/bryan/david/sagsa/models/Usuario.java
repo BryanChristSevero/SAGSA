@@ -27,12 +27,6 @@ import java.util.List;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 
-    public interface criarUsuario {
-    }
-
-    public interface editarUsuario {
-    }
-
     public static final String TABLE_NAME = "docentes";
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -56,8 +50,8 @@ public class Usuario {
     private String senha;
 
     public enum TipoPerfil {
-    ROLE_DOCENTE,
-    ROLE_ADMIN
+        ROLE_DOCENTE,
+        ROLE_ADMIN
     }
 
     @Enumerated(EnumType.STRING)

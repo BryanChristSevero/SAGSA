@@ -1,16 +1,13 @@
-package bryan.david.sagsa.dtos;
+package bryan.david.sagsa.models.dtos;
 
 import java.time.LocalDateTime;
 
 public record SapzResponseDTO(
     Long id,
     String titulo,
-    String tipoEstrategia,
-    String contextualizacao,
+    String descricao,
     String desafio,
-    String resultadosEsperados,
-    Integer cargaHorariaSa,
-    Boolean compartilhada,
-    String nomeInstrutor,
-    LocalDateTime dataCriacao
+    LocalDateTime dataGeracao,
+    Integer cargaHorariaTotal,
+    String nomeUsuario
 ) {}

@@ -1,4 +1,4 @@
-package bryan.david.sagsa.dtos;
+package bryan.david.sagsa.models.dtos;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -8,27 +8,19 @@ public record SapzRequestDTO(
     @NotBlank(message = "O título é obrigatório")
     String titulo,
 
-    @NotNull(message = "O ID da unidade curricular é obrigatório")
-    Long unidadeCurricularId,
-
-    @NotNull(message = "O ID do instrutor é obrigatório")
-    Long instrutorId,
-
-    Long turmaId, // Opcional (pode ser template geral)
-
-    @NotBlank(message = "O tipo de estratégia é obrigatório")
-    String tipoEstrategia,
-
-    @NotBlank(message = "A contextualização é obrigatória")
-    String contextualizacao,
+    @NotBlank(message = "A descrição é obrigatória")
+    String descricao,
 
     @NotBlank(message = "O desafio é obrigatório")
     String desafio,
 
-    @NotBlank(message = "Os resultados esperados são obrigatórios")
-    String resultadosEsperados,
-
-    @NotNull(message = "A carga horária é obrigatória")
+    @NotNull(message = "A carga horária total é obrigatória")
     @Positive(message = "A carga horária deve ser maior que zero")
-    Integer cargaHorariaSa
+    Integer cargaHorariaTotal,
+
+    @NotNull(message = "O ID do módulo é obrigatório")
+    Long idModulo,
+
+    @NotNull(message = "O ID do usuário é obrigatório")
+    Long usuarioId
 ) {}

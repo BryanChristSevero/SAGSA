@@ -1,7 +1,7 @@
 package bryan.david.sagsa.controllers;
 
-import bryan.david.sagsa.dtos.UsuarioRequestDTO;
-import bryan.david.sagsa.dtos.UsuarioResponseDTO;
+import bryan.david.sagsa.models.dtos.UsuarioRequestDTO;
+import bryan.david.sagsa.models.dtos.UsuarioResponseDTO;
 import bryan.david.sagsa.services.UsuarioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
