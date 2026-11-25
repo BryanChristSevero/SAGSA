@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGSA - Gerenciador de SAPZ</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f8f9fa; margin: 0; padding: 0; }
+        header { background: #004085; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #002752; }
+        header h1 { margin: 0; font-size: 20px; }
+        .user-info { display: flex; align-items: center; gap: 15px; }
+        .btn-logout { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
+        h2 { color: #004085; margin-top: 0; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        .form-group { margin-bottom: 12px; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; color: #495057; }
+        input, select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; }
+        textarea { height: 80px; resize: vertical; }
+        .btn-primary { background: #004085; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-primary:hover { background: #002752; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #dee2e6; }
+        th { background: #e9ecef; color: #495057; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #17a2b8; color: white; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SENAI - Sistema Gerador de SAPZ (SAGSA)</h1>
+        <div class="user-info">
+            <span id="userDisplay">Carregando...</span>
+            <button class="btn-logout" onclick="logout()">Sair</button>
+        </div>
+    </header>
+    <div class="container">
+        <!-- Cadastrar Nova SAPZ -->
+        <div class="card">
+            <h2>Nova Situação de Aprendizagem (SAPZ)</h2>
+            <form id="sapzForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="titulo">Título da SAPZ</label>
+                        <input type="text" id="titulo" required placeholder="Ex: Projeto Integrador">
+                    </div>
+                    <div class="form-group">
+                        <label for="cargaHorariaTotal">Carga Horária Total (horas)</label>
+                        <input type="number" id="cargaHorariaTotal" required value="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="idModulo">ID do Módulo</label>
+                        <input type="number" id="idModulo" required value="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="usuarioId">ID do Usuário (Instrutor)</label>
+                        <input type="number" id="usuarioId" required value="1">
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="descricao">Descrição / Contextualização</label>
+                        <textarea id="descricao" required placeholder="Contexto do cenário de aprendizagem..."></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="desafio">Desafio Proposto</label>
+                        <textarea id="desafio" required placeholder="Qual o problema/desafio a ser resolvido..."></textarea>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Salvar SAPZ</button>
+            </form>
+        </div>
+        <!-- Lista de SAPZs -->
+        <div class="card">
+            <h2>Situações de Aprendizagem Cadastradas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Título</th>
+                        <th>Carga Horária</th>
+                        <th>Criado por</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="sapzTableBody">
+                    <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="scripts/script.js"></script>
+</body>
+</html>

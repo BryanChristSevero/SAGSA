@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGSA - Criar Conta</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 450px; border-top: 5px solid #004085; }
+        h2 { margin-top: 0; color: #004085; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; color: #333; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 12px; background: #004085; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #002752; }
+        .footer-text { text-align: center; margin-top: 15px; font-size: 14px; }
+        .footer-text a { color: #004085; text-decoration: none; font-weight: bold; }
+        .alert { padding: 10px; border-radius: 4px; margin-bottom: 15px; display: none; }
+        .alert-error { background: #f8d7da; color: #721c24; }
+        .alert-success { background: #d4edda; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Criar Conta - SAGSA</h2>
+        <div id="alert" class="alert"></div>
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="nome">Nome Completo</label>
+                <input type="text" id="nome" required placeholder="João da Silva">
+            </div>
+            <div class="form-group">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" required placeholder="joao@senai.br">
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" required placeholder="******">
+            </div>
+            <div class="form-group">
+                <label for="tipoPerfil">Perfil</label>
+                <select id="tipoPerfil" required>
+                    <option value="ROLE_ADMIN">ADMINISTRADOR</option>
+                    <option value="ROLE_DOCENTE" selected>DOCENTE / INSTRUTOR</option>
+                </select>
+            </div>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <div class="footer-text">
+            Já possui cadastro? <a href="login.html">Faça Login</a>
+        </div>
+    </div>
+    <script src="scripts/signup.js"></script>
+</body>
+</html>
