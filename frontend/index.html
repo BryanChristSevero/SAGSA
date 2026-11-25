@@ -1,94 +1,3780 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAGSA - Gerenciador de SAPZ</title>
-    <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #f8f9fa; margin: 0; padding: 0; }
-        header { background: #004085; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #002752; }
-        header h1 { margin: 0; font-size: 20px; }
-        .user-info { display: flex; align-items: center; gap: 15px; }
-        .btn-logout { background: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 25px; }
-        h2 { color: #004085; margin-top: 0; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .full-width { grid-column: span 2; }
-        .form-group { margin-bottom: 12px; }
-        label { display: block; font-weight: 600; margin-bottom: 5px; color: #495057; }
-        input, select, textarea { width: 100%; padding: 8px 12px; border: 1px solid #ced4da; border-radius: 4px; }
-        textarea { height: 80px; resize: vertical; }
-        .btn-primary { background: #004085; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-primary:hover { background: #002752; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #dee2e6; }
-        th { background: #e9ecef; color: #495057; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #17a2b8; color: white; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SENAI | SAGSA - Gestão de Situações de Aprendizagem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ==========================================================================
+       DESIGN TOKENS - IDENTIDADE VISUAL INSTITUCIONAL SENAI
+       ========================================================================== */
+    :root {
+      --senai-blue: #0047B6;
+      --senai-blue-hover: #003891;
+      --senai-navy: #002B5C;
+      --senai-navy-dark: #001D40;
+      --senai-light-blue: #E8F0FE;
+      --senai-orange: #F37021;
+      --senai-orange-hover: #D95D14;
+      --senai-orange-light: #FFF3EB;
+
+      --white: #FFFFFF;
+      --bg-gray: #F4F6F9;
+      --border-color: #DCE3EE;
+      --text-dark: #1E293B;
+      --text-muted: #64748B;
+
+      --danger: #DC2626;
+      --danger-hover: #B91C1C;
+      --danger-light: #FEF2F2;
+
+      --success: #16A34A;
+      --success-light: #F0FDF4;
+
+      --warning: #D97706;
+      --warning-light: #FFFBEB;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 12px 30px rgba(0, 43, 92, 0.16);
+
+      --sidebar-width: 270px;
+      --topbar-height: 68px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ==========================================================================
+       RESET E BASE
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      min-height: 100%;
+      font-family: 'Inter', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-gray);
+      color: var(--text-dark);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: 0.9375rem;
+    }
+
+    button {
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       TELA DE AUTENTICAÇÃO (LOGIN & CADASTRO - ISOLADA EM #auth-view)
+       ========================================================================== */
+    #auth-view {
+      background: #f0f2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      width: 100%;
+      margin: 0;
+      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #auth-view * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    #auth-view.hidden {
+      display: none !important;
+    }
+
+    #auth-view .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      border-top: 5px solid #004085;
+    }
+
+    #auth-view #login-card {
+      max-width: 400px;
+    }
+
+    #auth-view #signup-card {
+      max-width: 450px;
+    }
+
+    #auth-view h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #004085;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    #auth-view .form-group {
+      margin-bottom: 15px;
+    }
+
+    #auth-view label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    #auth-view input,
+    #auth-view select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: #fff;
+      color: #333;
+      font-size: 0.95rem;
+    }
+
+    #auth-view input:focus,
+    #auth-view select:focus {
+      outline: none;
+      border-color: #004085;
+      box-shadow: 0 0 0 2px rgba(0, 64, 133, 0.15);
+    }
+
+    #auth-view button[type="submit"] {
+      width: 100%;
+      padding: 12px;
+      background: #004085;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.2s ease;
+    }
+
+    #auth-view button[type="submit"]:hover:not(:disabled) {
+      background: #002752;
+    }
+
+    #auth-view button[type="submit"]:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    #auth-view .footer-text {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    #auth-view .footer-text a {
+      color: #004085;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #auth-view .footer-text a:hover {
+      text-decoration: underline;
+    }
+
+    #auth-view .alert {
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      display: none;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    #auth-view .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    #auth-view .alert-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    /* ==========================================================================
+       COMPONENTES UTILITÁRIOS DO SISTEMA PRINCIPAL (BOTÕES, BADGES, INPUTS)
+       ========================================================================== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 0.875rem;
+      transition: all var(--transition);
+      white-space: nowrap;
+      min-height: 40px;
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: var(--senai-blue);
+      color: var(--white);
+      box-shadow: 0 2px 6px rgba(0, 71, 182, 0.25);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: var(--senai-blue-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-orange {
+      background-color: var(--senai-orange);
+      color: var(--white);
+      box-shadow: 0 2px 6px rgba(243, 112, 33, 0.25);
+    }
+
+    .btn-orange:hover:not(:disabled) {
+      background-color: var(--senai-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      background-color: var(--white);
+      color: var(--text-dark);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      background-color: var(--bg-gray);
+      border-color: #CBD5E1;
+    }
+
+    .btn-danger {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: var(--danger-hover);
+    }
+
+    .btn-danger-soft {
+      background-color: var(--danger-light);
+      color: var(--danger);
+      padding: 6px 10px;
+      min-height: 32px;
+      font-size: 0.8125rem;
+    }
+
+    .btn-danger-soft:hover:not(:disabled) {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .btn-info-soft {
+      background-color: var(--senai-light-blue);
+      color: var(--senai-blue);
+      padding: 6px 10px;
+      min-height: 32px;
+      font-size: 0.8125rem;
+    }
+
+    .btn-info-soft:hover:not(:disabled) {
+      background-color: var(--senai-blue);
+      color: var(--white);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      min-height: 34px;
+      font-size: 0.8125rem;
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge-blue {
+      background-color: var(--senai-light-blue);
+      color: var(--senai-blue);
+    }
+
+    .badge-orange {
+      background-color: var(--senai-orange-light);
+      color: var(--senai-orange);
+    }
+
+    .badge-green {
+      background-color: var(--success-light);
+      color: var(--success);
+    }
+
+    .badge-navy {
+      background-color: #E2E8F0;
+      color: var(--senai-navy);
+    }
+
+    .badge-red {
+      background-color: var(--danger-light);
+      color: var(--danger);
+    }
+
+    /* Formulários dos Modais */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 6px;
+    }
+
+    .form-label span.req {
+      color: var(--danger);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #CBD5E1;
+      border-radius: var(--radius-sm);
+      background-color: var(--white);
+      color: var(--text-dark);
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--senai-blue);
+      box-shadow: 0 0 0 3px rgba(0, 71, 182, 0.14);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 84px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-error-box {
+      background-color: var(--danger-light);
+      border: 1px solid #FECACA;
+      color: var(--danger);
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    /* ==========================================================================
+       LAYOUT PRINCIPAL DO SISTEMA (SIDEBAR + TOPBAR + CONTEÚDO)
+       ========================================================================== */
+    .app-shell {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background-color: var(--senai-navy);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 50;
+      transition: transform var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: var(--senai-navy-dark);
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sidebar-logo-text strong {
+      display: block;
+      font-size: 1.08rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .sidebar-logo-text strong span {
+      color: var(--senai-orange);
+    }
+
+    .sidebar-logo-text small {
+      display: block;
+      font-size: 0.68rem;
+      color: #93C5FD;
+      font-weight: 500;
+    }
+
+    .sidebar-close-btn {
+      display: none;
+      color: var(--white);
+      padding: 6px;
+      border-radius: var(--radius-sm);
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+
+    .nav-section-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94A3B8;
+      padding: 12px 12px 6px;
+    }
+
+    .nav-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: #CBD5E1;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-align: left;
+      transition: all var(--transition);
+      margin-bottom: 3px;
+    }
+
+    .nav-item:hover {
+      background-color: rgba(255, 255, 255, 0.08);
+      color: var(--white);
+    }
+
+    .nav-item.active {
+      background-color: var(--senai-blue);
+      color: var(--white);
+      font-weight: 600;
+      box-shadow: inset 3px 0 0 var(--senai-orange);
+    }
+
+    .nav-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-footer {
+      padding: 14px 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      background-color: rgba(0, 0, 0, 0.18);
+    }
+
+    .sidebar-inst-note {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.68rem;
+      line-height: 1.4;
+      color: #94A3B8;
+      text-align: center;
+    }
+
+    .sidebar-inst-note strong {
+      color: #CBD5E1;
+      display: block;
+    }
+
+    .user-mini-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .user-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background-color: var(--senai-orange);
+      color: var(--white);
+      font-weight: 800;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .user-meta {
+      overflow: hidden;
+    }
+
+    .user-meta strong {
+      display: block;
+      font-size: 0.84rem;
+      color: var(--white);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .user-meta span {
+      display: block;
+      font-size: 0.72rem;
+      color: #93C5FD;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .btn-logout {
+      width: 100%;
+      background-color: rgba(220, 38, 38, 0.18);
+      color: #FCA5A5;
+      border: 1px solid rgba(220, 38, 38, 0.35);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 0.8125rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all var(--transition);
+    }
+
+    .btn-logout:hover {
+      background-color: var(--danger);
+      color: var(--white);
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(15, 23, 42, 0.5);
+      z-index: 45;
+      backdrop-filter: blur(2px);
+    }
+
+    /* Main Area */
+    .main-wrapper {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: var(--topbar-height);
+      background-color: var(--white);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .menu-toggle-btn {
+      display: none;
+      padding: 8px;
+      border-radius: var(--radius-sm);
+      color: var(--senai-navy);
+      background-color: var(--bg-gray);
+    }
+
+    .topbar-title-group h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--senai-navy);
+      line-height: 1.2;
+    }
+
+    .topbar-title-group p {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .topbar-mode-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background-color: var(--bg-gray);
+      padding: 5px 10px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .topbar-mode-select {
+      border: none;
+      background: transparent;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      color: var(--senai-navy);
+      cursor: pointer;
+      outline: none;
+    }
+
+    .topbar-api-input {
+      width: 175px;
+      padding: 4px 8px;
+      font-size: 0.78rem;
+      border: 1px solid #CBD5E1;
+      border-radius: 4px;
+      background-color: var(--white);
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .status-dot.demo {
+      background-color: var(--senai-orange);
+    }
+
+    .status-dot.api {
+      background-color: var(--success);
+    }
+
+    .main-content {
+      padding: 26px 28px 40px;
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ==========================================================================
+       CARDS, KPIs, TABELAS E TOOLBARS
+       ========================================================================== */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background-color: var(--white);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background-color: var(--senai-blue);
+    }
+
+    .kpi-card.orange::before { background-color: var(--senai-orange); }
+    .kpi-card.green::before { background-color: var(--success); }
+    .kpi-card.navy::before { background-color: var(--senai-navy); }
+
+    .kpi-info span {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .kpi-info strong {
+      display: block;
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--senai-navy);
+      margin-top: 6px;
+      line-height: 1;
+    }
+
+    .kpi-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background-color: var(--senai-light-blue);
+      color: var(--senai-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .kpi-card.orange .kpi-icon {
+      background-color: var(--senai-orange-light);
+      color: var(--senai-orange);
+    }
+
+    .kpi-card.green .kpi-icon {
+      background-color: var(--success-light);
+      color: var(--success);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .panel-card {
+      background-color: var(--white);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .panel-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--senai-navy);
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+      max-width: 420px;
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 17px;
+      height: 17px;
+      color: var(--text-muted);
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 10px 14px 10px 38px;
+      border-radius: var(--radius-sm);
+      border: 1px solid #CBD5E1;
+      background-color: var(--white);
+      font-size: 0.875rem;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: var(--senai-blue);
+      box-shadow: 0 0 0 3px rgba(0, 71, 182, 0.12);
+    }
+
+    .toolbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* Tabelas */
+    .table-responsive {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+
+    thead th {
+      background-color: #F8FAFC;
+      color: var(--senai-navy);
+      font-weight: 700;
+      text-align: left;
+      padding: 13px 16px;
+      border-bottom: 2px solid var(--border-color);
+      white-space: nowrap;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tbody td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-dark);
+      vertical-align: middle;
+    }
+
+    tbody tr:hover {
+      background-color: #F8FAFC;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .actions-cell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Cards de SAPZ */
+    .sapz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 18px;
+    }
+
+    .sapz-card {
+      background-color: var(--white);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--transition), box-shadow var(--transition);
+      border-top: 4px solid var(--senai-blue);
+    }
+
+    .sapz-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .sapz-card-body {
+      padding: 18px;
+      flex: 1;
+    }
+
+    .sapz-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .sapz-card-title {
+      font-size: 1.02rem;
+      font-weight: 700;
+      color: var(--senai-navy);
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .sapz-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .sapz-challenge-box {
+      background-color: var(--senai-light-blue);
+      border-left: 3px solid var(--senai-orange);
+      padding: 10px 12px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.82rem;
+      color: var(--senai-navy);
+      margin-bottom: 14px;
+    }
+
+    .sapz-challenge-box strong {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      color: var(--senai-orange);
+      margin-bottom: 2px;
+    }
+
+    .sapz-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .sapz-card-footer {
+      padding: 12px 18px;
+      background-color: #F8FAFC;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border-radius: 0 0 var(--radius-md) var(--radius-md);
+    }
+
+    .quick-action-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background-color: var(--white);
+      text-align: left;
+      margin-bottom: 10px;
+      transition: all var(--transition);
+    }
+
+    .quick-action-btn:hover {
+      border-color: var(--senai-blue);
+      background-color: var(--senai-light-blue);
+    }
+
+    .quick-action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      background-color: var(--senai-blue);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .quick-action-icon.orange {
+      background-color: var(--senai-orange);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 46px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state h4 {
+      color: var(--senai-navy);
+      margin-top: 12px;
+      margin-bottom: 6px;
+    }
+
+    /* ==========================================================================
+       MODAIS
+       ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 29, 64, 0.55);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 100;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .modal-dialog {
+      background-color: var(--white);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+      animation: slideUp 0.2s ease-out;
+    }
+
+    .modal-dialog.modal-lg {
+      max-width: 780px;
+    }
+
+    .modal-dialog.modal-sm {
+      max-width: 420px;
+    }
+
+    .modal-header {
+      padding: 18px 22px;
+      background-color: var(--senai-navy);
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      color: #CBD5E1;
+      padding: 4px;
+      border-radius: var(--radius-sm);
+      transition: color var(--transition);
+    }
+
+    .modal-close:hover {
+      color: var(--white);
+    }
+
+    .modal-body {
+      padding: 22px;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      padding: 14px 22px;
+      background-color: #F8FAFC;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    /* Ficha de Detalhes da SAPZ */
+    .ficha-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--senai-blue);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .ficha-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .ficha-meta-box {
+      background-color: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+    }
+
+    .ficha-meta-box small {
+      display: block;
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .ficha-meta-box strong {
+      font-size: 0.92rem;
+      color: var(--senai-navy);
+    }
+
+    .ficha-section {
+      margin-bottom: 18px;
+    }
+
+    .ficha-section h4 {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--senai-blue);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 10px;
+      background-color: #E2E8F0;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--senai-blue), var(--senai-orange));
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    /* ==========================================================================
+       ABA ARQUITETURA & PROJETO (DIAGRAMA EM CAMADAS)
+       ========================================================================== */
+    .arch-layout {
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 20px;
+    }
+
+    .arch-diagram {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    .arch-layer {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      padding: 16px 18px;
+      background-color: var(--white);
+      border-left: 5px solid var(--senai-blue);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .arch-layer.layer-core {
+      border-left-color: var(--senai-orange);
+      background-color: #FFFBF8;
+    }
+
+    .arch-layer.layer-data {
+      border-left-color: var(--senai-navy);
+      background-color: #F8FAFC;
+    }
+
+    .arch-layer-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .arch-layer-top strong {
+      font-size: 0.96rem;
+      color: var(--senai-navy);
+    }
+
+    .arch-layer p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .arch-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .arch-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background-color: var(--senai-light-blue);
+      color: var(--senai-navy);
+      border: 1px solid #CBD5E1;
+    }
+
+    .arch-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--senai-blue);
+      padding: 2px 0;
+    }
+
+    .arch-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .arch-note-box {
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      font-size: 0.84rem;
+      border: 1px solid var(--border-color);
+    }
+
+    .arch-note-box.pro {
+      background-color: var(--success-light);
+      border-color: #BBF7D0;
+    }
+
+    .arch-note-box.con {
+      background-color: var(--warning-light);
+      border-color: #FDE68A;
+    }
+
+    .arch-note-box strong {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+    }
+
+    .inst-meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .inst-meta-item {
+      padding: 12px 14px;
+      background-color: var(--bg-gray);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-sm);
+    }
+
+    .inst-meta-item small {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .inst-meta-item strong {
+      font-size: 0.9rem;
+      color: var(--senai-navy);
+    }
+
+    .team-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    /* ==========================================================================
+       TOAST NOTIFICATIONS
+       ========================================================================== */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 380px;
+      width: calc(100vw - 40px);
+    }
+
+    .toast {
+      background-color: var(--white);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      padding: 14px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      border-left: 4px solid var(--senai-blue);
+      animation: slideInRight 0.25s ease-out;
+    }
+
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    .toast.warning { border-left-color: var(--senai-orange); }
+
+    .toast-content {
+      flex: 1;
+      font-size: 0.86rem;
+    }
+
+    .toast-content strong {
+      display: block;
+      font-size: 0.88rem;
+      color: var(--text-dark);
+      margin-bottom: 2px;
+    }
+
+    .toast-content p {
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* ==========================================================================
+       ANIMAÇÕES
+       ========================================================================== */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    /* ==========================================================================
+       RESPONSIVIDADE
+       ========================================================================== */
+    @media (max-width: 1024px) {
+      .dashboard-grid,
+      .arch-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .sidebar-close-btn {
+        display: inline-flex;
+      }
+      .sidebar-overlay.open {
+        display: block;
+      }
+      .main-wrapper {
+        margin-left: 0;
+      }
+      .menu-toggle-btn {
+        display: inline-flex;
+      }
+      .main-content {
+        padding: 18px 16px 32px;
+      }
+      .topbar {
+        padding: 10px 16px;
+        height: auto;
+        min-height: var(--topbar-height);
+      }
+      .topbar-api-input {
+        width: 140px;
+      }
+      .form-row,
+      .ficha-grid,
+      .arch-pros-cons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ==========================================================================
+       ESTILOS DE IMPRESSÃO DA FICHA DA SAPZ
+       ========================================================================== */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #sapz-print-area,
+      #sapz-print-area * {
+        visibility: visible;
+      }
+      #sapz-print-area {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        padding: 20px;
+        background: #FFFFFF;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>SENAI - Sistema Gerador de SAPZ (SAGSA)</h1>
-        <div class="user-info">
-            <span id="userDisplay">Carregando...</span>
-            <button class="btn-logout" onclick="logout()">Sair</button>
+  <!-- Container de Notificações Toast -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- ========================================================================
+       TELA DE AUTENTICAÇÃO (LOGIN & CADASTRO)
+       ======================================================================== -->
+  <section id="auth-view">
+    <!-- Card de Login -->
+    <div id="login-card" class="card">
+      <h2>SAGSA - Entrar</h2>
+      <div id="login-alert" class="alert alert-error"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">E-mail</label>
+          <input type="email" id="username" required placeholder="seu.email@senai.br" />
         </div>
-    </header>
-    <div class="container">
-        <!-- Cadastrar Nova SAPZ -->
-        <div class="card">
-            <h2>Nova Situação de Aprendizagem (SAPZ)</h2>
-            <form id="sapzForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="titulo">Título da SAPZ</label>
-                        <input type="text" id="titulo" required placeholder="Ex: Projeto Integrador">
-                    </div>
-                    <div class="form-group">
-                        <label for="cargaHorariaTotal">Carga Horária Total (horas)</label>
-                        <input type="number" id="cargaHorariaTotal" required value="20">
-                    </div>
-                    <div class="form-group">
-                        <label for="idModulo">ID do Módulo</label>
-                        <input type="number" id="idModulo" required value="1">
-                    </div>
-                    <div class="form-group">
-                        <label for="usuarioId">ID do Usuário (Instrutor)</label>
-                        <input type="number" id="usuarioId" required value="1">
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="descricao">Descrição / Contextualização</label>
-                        <textarea id="descricao" required placeholder="Contexto do cenário de aprendizagem..."></textarea>
-                    </div>
-                    <div class="form-group full-width">
-                        <label for="desafio">Desafio Proposto</label>
-                        <textarea id="desafio" required placeholder="Qual o problema/desafio a ser resolvido..."></textarea>
-                    </div>
-                </div>
-                <button type="submit" class="btn-primary">Salvar SAPZ</button>
-            </form>
+        <div class="form-group">
+          <label for="login-password">Senha</label>
+          <input type="password" id="login-password" required placeholder="******" />
         </div>
-        <!-- Lista de SAPZs -->
-        <div class="card">
-            <h2>Situações de Aprendizagem Cadastradas</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Título</th>
-                        <th>Carga Horária</th>
-                        <th>Criado por</th>
-                        <th>Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="sapzTableBody">
-                    <tr><td colspan="5" style="text-align:center;">Carregando...</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <button type="submit">Entrar</button>
+      </form>
+      <div class="footer-text">
+        Não tem uma conta? <a href="#" id="link-to-signup">Cadastre-se</a>
+      </div>
     </div>
-    <script src="scripts/script.js"></script>
+
+    <!-- Card de Cadastro -->
+    <div id="signup-card" class="card hidden">
+      <h2>Criar Conta - SAGSA</h2>
+      <div id="signup-alert" class="alert"></div>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="nome">Nome Completo</label>
+          <input type="text" id="nome" required placeholder="João da Silva" />
+        </div>
+        <div class="form-group">
+          <label for="email">E-mail</label>
+          <input type="email" id="email" required placeholder="joao@senai.br" />
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Senha</label>
+          <input type="password" id="signup-password" required placeholder="******" />
+        </div>
+        <div class="form-group">
+          <label for="tipoPerfil">Perfil</label>
+          <select id="tipoPerfil" required>
+            <option value="ROLE_ADMIN">ADMINISTRADOR</option>
+            <option value="ROLE_DOCENTE" selected>DOCENTE / INSTRUTOR</option>
+          </select>
+        </div>
+        <button type="submit">Cadastrar</button>
+      </form>
+      <div class="footer-text">
+        Já possui cadastro? <a href="#" id="link-to-login">Faça Login</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       APLICAÇÃO PRINCIPAL (DASHBOARD E MÓDULOS)
+       ======================================================================== -->
+  <div id="app-view" class="app-shell hidden">
+    <!-- Overlay Mobile -->
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar Institucional -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <svg width="36" height="36" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect width="48" height="48" rx="10" fill="#0047B6"/>
+            <path d="M10 14H38V20H18L10 14Z" fill="#FFFFFF"/>
+            <path d="M10 24H34L28 30H10V24Z" fill="#F37021"/>
+            <path d="M10 34H38V38H10V34Z" fill="#FFFFFF" fill-opacity="0.85"/>
+          </svg>
+          <div class="sidebar-logo-text">
+            <strong>SENAI <span>|</span> SAGSA</strong>
+            <small>Situações de Aprendizagem</small>
+          </div>
+        </div>
+        <button type="button" id="btn-close-sidebar" class="sidebar-close-btn" aria-label="Fechar menu">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Menu principal">
+        <div class="nav-section-label">Principal</div>
+        <button type="button" class="nav-item active" data-route="dashboard">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </button>
+
+        <div class="nav-section-label">Planejamento Pedagógico</div>
+        <button type="button" class="nav-item" data-route="sapzs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          Situações (SAPZ)
+        </button>
+        <button type="button" class="nav-item" data-route="atividades">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Atividades
+        </button>
+
+        <div class="nav-section-label">Estrutura Curricular</div>
+        <button type="button" class="nav-item" data-route="cursos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+          Cursos
+        </button>
+        <button type="button" class="nav-item" data-route="ppcs">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          PPCs
+        </button>
+        <button type="button" class="nav-item" data-route="modulos">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          Módulos
+        </button>
+        <button type="button" class="nav-item" data-route="capacidades">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          Capacidades
+        </button>
+        <button type="button" class="nav-item" data-route="criterios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          Critérios de Avaliação
+        </button>
+
+        <div class="nav-section-label">Administração</div>
+        <button type="button" class="nav-item" data-route="usuarios">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Usuários / Docentes
+        </button>
+
+        <div class="nav-section-label">Institucional</div>
+        <button type="button" class="nav-item" data-route="arquitetura">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="5" rx="1"/><rect x="3" y="10" width="18" height="5" rx="1"/><rect x="3" y="17" width="18" height="4" rx="1"/></svg>
+          Arquitetura &amp; Projeto
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-mini-card">
+          <div id="sidebar-user-avatar" class="user-avatar">BS</div>
+          <div class="user-meta">
+            <strong id="sidebar-user-name">Bryan Christ Severo</strong>
+            <span id="sidebar-user-email">bryan.severo@senai.br</span>
+          </div>
+        </div>
+        <button type="button" id="btn-logout" class="btn-logout">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sair do Sistema
+        </button>
+        <div class="sidebar-inst-note">
+          <strong>CFP SENAI Plínio Gilberto Kröeff</strong>
+          São Leopoldo / RS • Turma # APETEC132T26
+        </div>
+      </div>
+    </aside>
+
+    <!-- Área Principal -->
+    <div class="main-wrapper">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button type="button" id="btn-open-sidebar" class="menu-toggle-btn" aria-label="Abrir menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <div class="topbar-title-group">
+            <h2 id="topbar-title">Dashboard</h2>
+            <p id="topbar-subtitle">Visão geral da gestão pedagógica</p>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="topbar-mode-bar" title="Alternar entre Modo Demonstração e API Spring Boot">
+            <span id="topbar-status-dot" class="status-dot demo"></span>
+            <select id="topbar-mode-select" class="topbar-mode-select" aria-label="Modo de Operação">
+              <option value="demo">Modo Demonstração (Local)</option>
+              <option value="api">API Spring Boot</option>
+            </select>
+            <input type="url" id="topbar-api-url" class="topbar-api-input hidden" value="http://localhost:8080" aria-label="URL da API" />
+          </div>
+        </div>
+      </header>
+
+      <!-- Conteúdo Dinâmico -->
+      <main id="main-content" class="main-content">
+        <!-- Renderizado dinamicamente via JavaScript -->
+      </main>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL GENÉRICO DE CRIAÇÃO / FORMULÁRIO
+       ======================================================================== -->
+  <div id="form-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3 id="form-modal-title">Novo Registro</h3>
+        <button type="button" class="modal-close" data-close-modal="form-modal" aria-label="Fechar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="dynamic-modal-form">
+        <div id="form-modal-body" class="modal-body"></div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-close-modal="form-modal">Cancelar</button>
+          <button type="submit" id="form-modal-submit" class="btn btn-primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL DE DETALHES / FICHA DA SAPZ
+       ======================================================================== -->
+  <div id="sapz-detail-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header no-print">
+        <h3>Ficha da Situação de Aprendizagem (SAPZ)</h3>
+        <button type="button" class="modal-close" data-close-modal="sapz-detail-modal" aria-label="Fechar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div id="sapz-print-area" class="modal-body">
+        <!-- Preenchido dinamicamente -->
+      </div>
+      <div class="modal-footer no-print">
+        <button type="button" class="btn btn-outline" data-close-modal="sapz-detail-modal">Fechar</button>
+        <button type="button" id="btn-print-sapz" class="btn btn-orange">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Imprimir / Salvar Ficha PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       MODAL DE CONFIRMAÇÃO DE EXCLUSÃO (SUBSTITUI confirm())
+       ======================================================================== -->
+  <div id="confirm-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-header" style="background-color: var(--danger);">
+        <h3>Confirmar Exclusão</h3>
+        <button type="button" class="modal-close" data-close-modal="confirm-modal" aria-label="Fechar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-modal-message" style="font-size: 0.94rem; color: var(--text-dark);"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" data-close-modal="confirm-modal">Cancelar</button>
+        <button type="button" id="btn-confirm-delete" class="btn btn-danger">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ==========================================================================
+     * SAGSA - SISTEMA DE APOIO À GERAÇÃO DE SITUAÇÕES DE APRENDIZAGEM (SENAI)
+     * Aplicação SPA em JavaScript Puro (ES6+) com suporte dual:
+     *   1) Modo Demonstração (dados realistas em localStorage)
+     *   2) Modo API Spring Boot (fetch + Bearer JWT)
+     * ==========================================================================
+     */
+
+    // --------------------------------------------------------------------------
+    // 1. PERSISTÊNCIA SEGURA (PROTEÇÃO CONTRA STORAGE CORROMPIDO OU BLOQUEADO)
+    // --------------------------------------------------------------------------
+    const STORAGE_KEYS = {
+      MODE: 'sagsa_mode',
+      API_URL: 'sagsa_api_url',
+      TOKEN: 'sagsa_jwt_token',
+      USER: 'sagsa_current_user',
+      DEMO_DB: 'sagsa_demo_db_v2'
+    };
+
+    const SafeStorage = {
+      get(key, fallback = null) {
+        try {
+          const val = window.localStorage.getItem(key);
+          return val !== null ? val : fallback;
+        } catch {
+          return fallback;
+        }
+      },
+      set(key, value) {
+        try {
+          window.localStorage.setItem(key, value);
+        } catch {
+          // Ignora silenciosamente se localStorage estiver indisponível
+        }
+      },
+      remove(key) {
+        try {
+          window.localStorage.removeItem(key);
+        } catch {
+          // Ignora silenciosamente
+        }
+      },
+      getJSON(key, fallback = null) {
+        try {
+          const raw = window.localStorage.getItem(key);
+          if (!raw) return fallback;
+          const parsed = JSON.parse(raw);
+          return parsed !== null ? parsed : fallback;
+        } catch {
+          return fallback;
+        }
+      },
+      setJSON(key, obj) {
+        try {
+          window.localStorage.setItem(key, JSON.stringify(obj));
+        } catch {
+          // Ignora silenciosamente
+        }
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // 2. ESTADO GLOBAL E METADADOS INSTITUCIONAIS
+    // --------------------------------------------------------------------------
+    const INSTITUTION_INFO = {
+      unidade: 'Centro de Formação Profissional SENAI Plínio Gilberto Kröeff',
+      cidade: 'São Leopoldo / RS',
+      curso: 'Técnico de Desenvolvimento de Sistemas',
+      turma: '# APETEC132T26',
+      equipe: ['Bryan Christ Severo', 'David Chaves Martins'],
+      dataDoc: '20/08/2026',
+      arquitetura: 'Arquitetura em Camadas'
+    };
+
+    const savedMode = SafeStorage.get(STORAGE_KEYS.MODE, 'demo');
+    const AppState = {
+      mode: savedMode === 'api' ? 'api' : 'demo',
+      apiUrl: SafeStorage.get(STORAGE_KEYS.API_URL, 'http://localhost:8080') || 'http://localhost:8080',
+      token: SafeStorage.get(STORAGE_KEYS.TOKEN, null),
+      user: SafeStorage.getJSON(STORAGE_KEYS.USER, null),
+      currentRoute: 'dashboard',
+      searchQuery: '',
+      cache: {
+        cursos: [],
+        ppcs: [],
+        modulos: [],
+        capacidades: [],
+        criterios: [],
+        sapzs: [],
+        atividades: [],
+        usuarios: []
+      }
+    };
+
+    const ROUTE_META = {
+      dashboard: { title: 'Dashboard', subtitle: 'Visão geral dos indicadores e últimas Situações de Aprendizagem' },
+      sapzs: { title: 'Situações de Aprendizagem (SAPZ)', subtitle: 'Gerencie situações-problema, desafios e fichas pedagógicas' },
+      atividades: { title: 'Atividades das SAPZs', subtitle: 'Planejamento de entregas e carga horária por situação' },
+      cursos: { title: 'Cursos Técnicos', subtitle: 'Catálogo de cursos e eixos tecnológicos do SENAI' },
+      ppcs: { title: 'Projetos Pedagógicos de Curso (PPC)', subtitle: 'Vigência e estrutura dos PPCs vinculados aos cursos' },
+      modulos: { title: 'Módulos Curriculares', subtitle: 'Unidades e módulos pertencentes aos PPCs' },
+      capacidades: { title: 'Capacidades', subtitle: 'Capacidades Técnicas, Socioemocionais e Básicas (MSEP)' },
+      criterios: { title: 'Critérios de Avaliação', subtitle: 'Indicadores de desempenho vinculados às capacidades' },
+      usuarios: { title: 'Usuários e Docentes', subtitle: 'Controle de docentes e administradores do sistema' },
+      arquitetura: { title: 'Arquitetura & Projeto', subtitle: 'Definição arquitetural em camadas e créditos institucionais do SAGSA' }
+    };
+
+    // --------------------------------------------------------------------------
+    // 3. DADOS INICIAIS REALISTAS DO CFP SENAI PLÍNIO GILBERTO KRÖEFF (DEMO)
+    // --------------------------------------------------------------------------
+    function createInitialDemoDB() {
+      return {
+        usuarios: [
+          { idUsuario: 1, nome: 'Bryan Christ Severo', email: 'bryan.severo@senai.br', senha: '123456', tipoPerfil: 'ROLE_ADMIN' },
+          { idUsuario: 2, nome: 'David Chaves Martins', email: 'david.martins@senai.br', senha: '123456', tipoPerfil: 'ROLE_DOCENTE' },
+          { idUsuario: 3, nome: 'Prof. Ricardo Almeida', email: 'ricardo.almeida@senai.br', senha: '123456', tipoPerfil: 'ROLE_DOCENTE' }
+        ],
+        cursos: [
+          { id: 1, nomeCurso: 'Técnico de Desenvolvimento de Sistemas', eixoTecnologico: 'Informação e Comunicação', cargaHorariaTotal: 1200 },
+          { id: 2, nomeCurso: 'Técnico em Automação Industrial', eixoTecnologico: 'Controle e Processos Industriais', cargaHorariaTotal: 1200 },
+          { id: 3, nomeCurso: 'Técnico em Mecatrônica', eixoTecnologico: 'Controle e Processos Industriais', cargaHorariaTotal: 1500 }
+        ],
+        ppcs: [
+          { id: 1, anoVigencia: 2026, idCurso: 1, nomeCurso: 'Técnico de Desenvolvimento de Sistemas' },
+          { id: 2, anoVigencia: 2026, idCurso: 2, nomeCurso: 'Técnico em Automação Industrial' },
+          { id: 3, anoVigencia: 2025, idCurso: 3, nomeCurso: 'Técnico em Mecatrônica' }
+        ],
+        modulos: [
+          { id: 1, idPpc: 1, nomeModulo: 'Módulo I - Lógica de Programação e Banco de Dados', descricao: 'Fundamentos algorítmicos, modelagem relacional MySQL e consultas estruturadas.' },
+          { id: 2, idPpc: 1, nomeModulo: 'Módulo II - Desenvolvimento Web e APIs REST', descricao: 'Construção de interfaces HTML/CSS/JS integradas a backends Spring Boot em Arquitetura em Camadas.' },
+          { id: 3, idPpc: 2, nomeModulo: 'Módulo II - Sistemas Supervisórios e CLPs', descricao: 'Programação de controladores lógicos programáveis, redes industriais e telas IHM.' }
+        ],
+        capacidades: [
+          { id: 1, idModulo: 2, tipoCapacidade: 'Técnica', descricao: 'Desenvolver aplicações web em HTML5, CSS3 e JavaScript puro integradas a APIs RESTful com JWT.' },
+          { id: 2, idModulo: 2, tipoCapacidade: 'Técnica', descricao: 'Estruturar serviços backend seguindo a Arquitetura em Camadas (Controller, Service, Repository).' },
+          { id: 3, idModulo: 2, tipoCapacidade: 'Socioemocional', descricao: 'Atuar de forma colaborativa, com comunicação técnica clara e organização de entregas em equipe.' },
+          { id: 4, idModulo: 1, tipoCapacidade: 'Básica', descricao: 'Interpretar requisitos de negócio e modelar entidades relacionais para persistência em banco de dados.' }
+        ],
+        criterios: [
+          { id: 1, idCapacidade: 1, descricao: 'Consome corretamente os endpoints GET, POST e DELETE tratando respostas de validação (400, 401, 404, 409).' },
+          { id: 2, idCapacidade: 1, descricao: 'Entrega layout responsivo seguindo a identidade visual institucional do SENAI.' },
+          { id: 3, idCapacidade: 2, descricao: 'Separa claramente as responsabilidades entre interface, regras de negócio (Core) e persistência de dados.' },
+          { id: 4, idCapacidade: 3, descricao: 'Cumpre o cronograma da Situação de Aprendizagem e documenta as decisões arquiteturais.' }
+        ],
+        sapzs: [
+          {
+            id: 1,
+            titulo: 'SAPZ 01 - Sistema SAGSA de Apoio à Geração de Situações de Aprendizagem',
+            descricao: 'Desenvolvimento completo do sistema web SAGSA para apoiar docentes do CFP SENAI Plínio Gilberto Kröeff na organização de Cursos, PPCs, Módulos, Capacidades, Critérios e SAPZs.',
+            desafio: 'Os docentes precisam padronizar e agilizar a elaboração de fichas de Situações de Aprendizagem. Projete o sistema utilizando Arquitetura em Camadas com API Spring Boot e front-end em HTML/JS puro.',
+            dataGeracao: '2026-08-20T14:30:00',
+            cargaHorariaTotal: 40,
+            idModulo: 2,
+            usuarioId: 1,
+            nomeUsuario: 'Bryan Christ Severo'
+          },
+          {
+            id: 2,
+            titulo: 'SAPZ 02 - Portal de Monitoramento de Linha de Produção 4.0',
+            descricao: 'Construção de um painel web para acompanhamento de indicadores OEE e alertas de parada em tempo real para uma indústria do Vale dos Sinos.',
+            desafio: 'Reduzir o tempo de resposta a paradas de máquina integrando sensores industriais a um painel web responsivo com autenticação JWT em 32 horas.',
+            dataGeracao: '2026-09-12T09:15:00',
+            cargaHorariaTotal: 32,
+            idModulo: 2,
+            usuarioId: 2,
+            nomeUsuario: 'David Chaves Martins'
+          }
+        ],
+        atividades: [
+          { id: 1, descricaoAtividade: 'Definição da Arquitetura em Camadas, modelagem do banco MySQL e documentação técnica.', cargaHoraria: 8, idSapz: 1 },
+          { id: 2, descricaoAtividade: 'Implementação dos Controllers, Services, Repositories e autenticação JWT no Spring Boot.', cargaHoraria: 16, idSapz: 1 },
+          { id: 3, descricaoAtividade: 'Criação da interface web responsiva nas cores do SENAI com ficha imprimível de SAPZ.', cargaHoraria: 16, idSapz: 1 },
+          { id: 4, descricaoAtividade: 'Prototipação do painel OEE e definição dos contratos JSON da API.', cargaHoraria: 12, idSapz: 2 },
+          { id: 5, descricaoAtividade: 'Integração front-end/backend, testes de validação e apresentação técnica.', cargaHoraria: 20, idSapz: 2 }
+        ]
+      };
+    }
+
+    let memoryFallbackDB = null;
+    const LocalDB = {
+      load() {
+        const parsed = SafeStorage.getJSON(STORAGE_KEYS.DEMO_DB, null);
+        if (parsed && Array.isArray(parsed.usuarios) && Array.isArray(parsed.sapzs)) {
+          return parsed;
+        }
+        if (memoryFallbackDB) {
+          return memoryFallbackDB;
+        }
+        const seed = createInitialDemoDB();
+        this.save(seed);
+        return seed;
+      },
+      save(db) {
+        memoryFallbackDB = db;
+        SafeStorage.setJSON(STORAGE_KEYS.DEMO_DB, db);
+      },
+      nextId(list, idField = 'id') {
+        if (!Array.isArray(list) || !list.length) return 1;
+        return Math.max(...list.map(item => Number(item[idField] || 0))) + 1;
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // 4. CAMADA DE SERVIÇO (API SPRING BOOT + MODO DEMONSTRAÇÃO)
+    // --------------------------------------------------------------------------
+    const ApiService = {
+      /**
+       * Realiza chamadas HTTP reais para o Spring Boot ou simula o comportamento no LocalDB.
+       */
+      async request(endpoint, options = {}) {
+        const method = (options.method || 'GET').toUpperCase();
+        const body = options.body || null;
+
+        if (AppState.mode === 'demo') {
+          return this.handleDemoRequest(endpoint, method, body);
+        }
+
+        // Modo API Spring Boot Real
+        const baseUrl = AppState.apiUrl.replace(/\/+$/, '');
+        const headers = { 'Content-Type': 'application/json' };
+        if (AppState.token && !options.skipAuth) {
+          headers['Authorization'] = `Bearer ${AppState.token}`;
+        }
+
+        let response;
+        try {
+          response = await fetch(`${baseUrl}${endpoint}`, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : undefined
+          });
+        } catch {
+          throw new Error(`Não foi possível conectar à API em ${baseUrl}. Verifique se o Spring Boot está rodando e o CORS liberado.`);
+        }
+
+        // Tratamento de erros HTTP (400, 401, 403, 404, 409, 500)
+        if (!response.ok) {
+          let errorMessage = `Erro HTTP ${response.status}`;
+          try {
+            const errData = await response.json();
+            if (response.status === 400 && typeof errData === 'object' && errData !== null && !errData.message) {
+              errorMessage = Object.entries(errData)
+                .map(([field, msg]) => `${field}: ${msg}`)
+                .join(' | ');
+            } else if (errData && errData.message) {
+              errorMessage = errData.message;
+            } else if (errData && errData.error) {
+              errorMessage = errData.error;
+            }
+          } catch {
+            if (response.status === 401 || response.status === 403) {
+              errorMessage = 'Credenciais inválidas ou sessão expirada. Faça login novamente.';
+            }
+          }
+
+          if (response.status === 401 && !options.skipAuth) {
+            logout(false);
+          }
+          throw new Error(errorMessage);
+        }
+
+        if (response.status === 204) return null;
+        return response.json();
+      },
+
+      /**
+       * Simula todos os endpoints e DTOs do backend Spring Boot no localStorage.
+       */
+      async handleDemoRequest(endpoint, method, body) {
+        const db = LocalDB.load();
+
+        // POST /login
+        if (endpoint === '/login' && method === 'POST') {
+          const emailBusca = String((body && body.email) || '').toLowerCase();
+          const senhaBusca = String((body && body.senha) || '');
+          const user = db.usuarios.find(u => String(u.email).toLowerCase() === emailBusca);
+          if (!user || (user.senha && user.senha !== senhaBusca)) {
+            throw new Error('E-mail ou senha incorretos. No modo demonstração, use bryan.severo@senai.br e senha 123456 (ou cadastre uma nova conta).');
+          }
+          const { senha, ...safeUser } = user;
+          return { token: `demo-jwt-${user.idUsuario}-${Date.now()}`, user: safeUser };
+        }
+
+        // Helper para extrair recurso e ID (/api/recurso ou /api/recurso/123)
+        const match = endpoint.match(/^\/api\/([a-z]+)(?:\/(\d+))?$/);
+        if (!match) throw new Error(`Endpoint não suportado no modo demo: ${endpoint}`);
+        const resource = match[1];
+        const id = match[2] ? Number(match[2]) : null;
+
+        // GET /api/{resource}
+        if (method === 'GET' && !id) {
+          if (resource === 'usuarios') {
+            return db.usuarios.map(({ senha, ...rest }) => rest);
+          }
+          return db[resource] || [];
+        }
+
+        // DELETE /api/{resource}/{id}
+        if (method === 'DELETE' && id) {
+          const list = db[resource];
+          if (!Array.isArray(list)) throw new Error('Recurso não encontrado.');
+          const idKey = resource === 'usuarios' ? 'idUsuario' : 'id';
+          const index = list.findIndex(item => Number(item[idKey]) === id);
+          if (index === -1) throw new Error('Registro não encontrado.');
+          list.splice(index, 1);
+          LocalDB.save(db);
+          return null;
+        }
+
+        // POST /api/{resource}
+        if (method === 'POST') {
+          if (resource === 'usuarios') {
+            if (!body.nome || body.nome.trim().length < 2) {
+              throw new Error('O nome deve ter pelo menos 2 caracteres.');
+            }
+            if (!body.senha || body.senha.length < 6) {
+              throw new Error('A senha deve ter pelo menos 6 caracteres.');
+            }
+            if (db.usuarios.some(u => String(u.email).toLowerCase() === String(body.email).toLowerCase())) {
+              throw new Error('Já existe um usuário cadastrado com este e-mail.');
+            }
+            const novo = {
+              idUsuario: LocalDB.nextId(db.usuarios, 'idUsuario'),
+              nome: body.nome.trim(),
+              email: body.email.trim(),
+              senha: body.senha,
+              tipoPerfil: body.tipoPerfil || 'ROLE_DOCENTE'
+            };
+            db.usuarios.push(novo);
+            LocalDB.save(db);
+            const { senha, ...dto } = novo;
+            return dto;
+          }
+
+          if (resource === 'cursos') {
+            const novo = {
+              id: LocalDB.nextId(db.cursos),
+              nomeCurso: body.nomeCurso,
+              eixoTecnologico: body.eixoTecnologico,
+              cargaHorariaTotal: Number(body.cargaHorariaTotal)
+            };
+            db.cursos.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'ppcs') {
+            const curso = db.cursos.find(c => Number(c.id) === Number(body.idCurso));
+            if (!curso) throw new Error('Curso selecionado não encontrado.');
+            const novo = {
+              id: LocalDB.nextId(db.ppcs),
+              anoVigencia: Number(body.anoVigencia),
+              idCurso: curso.id,
+              nomeCurso: curso.nomeCurso
+            };
+            db.ppcs.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'modulos') {
+            const ppc = db.ppcs.find(p => Number(p.id) === Number(body.idPpc));
+            if (!ppc) throw new Error('PPC selecionado não encontrado.');
+            const novo = {
+              id: LocalDB.nextId(db.modulos),
+              idPpc: ppc.id,
+              nomeModulo: body.nomeModulo,
+              descricao: body.descricao
+            };
+            db.modulos.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'capacidades') {
+            const mod = db.modulos.find(m => Number(m.id) === Number(body.idModulo));
+            if (!mod) throw new Error('Módulo selecionado não encontrado.');
+            const novo = {
+              id: LocalDB.nextId(db.capacidades),
+              idModulo: mod.id,
+              tipoCapacidade: body.tipoCapacidade,
+              descricao: body.descricao
+            };
+            db.capacidades.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'criterios') {
+            const cap = db.capacidades.find(c => Number(c.id) === Number(body.idCapacidade));
+            if (!cap) throw new Error('Capacidade selecionada não encontrada.');
+            const novo = {
+              id: LocalDB.nextId(db.criterios),
+              idCapacidade: cap.id,
+              descricao: body.descricao
+            };
+            db.criterios.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'sapzs') {
+            if (db.sapzs.some(s => String(s.titulo).toLowerCase() === String(body.titulo).toLowerCase())) {
+              throw new Error('Já existe uma SAPZ com este título.');
+            }
+            const mod = db.modulos.find(m => Number(m.id) === Number(body.idModulo));
+            const usr = db.usuarios.find(u => Number(u.idUsuario) === Number(body.usuarioId));
+            if (!mod) throw new Error('Módulo não encontrado.');
+            if (!usr) throw new Error('Usuário/Docente não encontrado.');
+            const novo = {
+              id: LocalDB.nextId(db.sapzs),
+              titulo: body.titulo,
+              descricao: body.descricao,
+              desafio: body.desafio,
+              dataGeracao: new Date().toISOString(),
+              cargaHorariaTotal: Number(body.cargaHorariaTotal),
+              idModulo: mod.id,
+              usuarioId: usr.idUsuario,
+              nomeUsuario: usr.nome
+            };
+            db.sapzs.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+
+          if (resource === 'atividades') {
+            const sapz = db.sapzs.find(s => Number(s.id) === Number(body.idSapz));
+            if (!sapz) throw new Error('SAPZ selecionada não encontrada.');
+            const novo = {
+              id: LocalDB.nextId(db.atividades),
+              descricaoAtividade: body.descricaoAtividade,
+              cargaHoraria: Number(body.cargaHoraria),
+              idSapz: sapz.id
+            };
+            db.atividades.push(novo);
+            LocalDB.save(db);
+            return novo;
+          }
+        }
+
+        throw new Error('Operação não suportada.');
+      }
+    };
+
+    // --------------------------------------------------------------------------
+    // 5. UTILITÁRIOS DE INTERFACE (TOAST, ESCAPE, DATAS, MODAIS)
+    // --------------------------------------------------------------------------
+    function escapeHTML(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function formatDateTime(isoString) {
+      if (!isoString) return '—';
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      return d.toLocaleDateString('pt-BR', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      });
+    }
+
+    function getInitials(name) {
+      if (!name) return 'SN';
+      const parts = String(name).trim().split(/\s+/);
+      return ((parts[0]?.[0] || '') + (parts[parts.length - 1]?.[0] || '')).toUpperCase();
+    }
+
+    function showToast(title, message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <div class="toast-content">
+          <strong>${escapeHTML(title)}</strong>
+          <p>${escapeHTML(message)}</p>
+        </div>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(30px)';
+        toast.style.transition = 'all 0.25s ease';
+        setTimeout(() => toast.remove(), 260);
+      }, 4000);
+    }
+
+    function openModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(modalId) {
+      const el = document.getElementById(modalId);
+      if (el) el.classList.add('hidden');
+    }
+
+    let currentConfirmCallback = null;
+    function openConfirmModal(message, onConfirm) {
+      const msgEl = document.getElementById('confirm-modal-message');
+      if (msgEl) msgEl.textContent = message;
+      currentConfirmCallback = onConfirm;
+      openModal('confirm-modal');
+    }
+
+    let currentFormSubmitHandler = null;
+    function openFormModal(title, fieldsHtml, onSubmit) {
+      const titleEl = document.getElementById('form-modal-title');
+      const bodyEl = document.getElementById('form-modal-body');
+      if (titleEl) titleEl.textContent = title;
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div id="modal-form-error" class="form-error-box hidden"></div>
+          ${fieldsHtml}
+        `;
+      }
+      currentFormSubmitHandler = onSubmit;
+      openModal('form-modal');
+    }
+
+    // --------------------------------------------------------------------------
+    // 6. GERENCIAMENTO DE MODO (DEMO vs API) E AUTENTICAÇÃO
+    // --------------------------------------------------------------------------
+    function syncModeUI() {
+      const isApi = AppState.mode === 'api';
+      const topSelect = document.getElementById('topbar-mode-select');
+      const topApiInput = document.getElementById('topbar-api-url');
+      const dot = document.getElementById('topbar-status-dot');
+
+      if (topSelect) {
+        topSelect.value = AppState.mode;
+      }
+      if (topApiInput) {
+        topApiInput.value = AppState.apiUrl;
+        topApiInput.classList.toggle('hidden', !isApi);
+      }
+      if (dot) {
+        dot.className = `status-dot ${isApi ? 'api' : 'demo'}`;
+      }
+    }
+
+    function setAppMode(newMode) {
+      AppState.mode = newMode === 'api' ? 'api' : 'demo';
+      SafeStorage.set(STORAGE_KEYS.MODE, AppState.mode);
+      syncModeUI();
+      showToast(
+        'Modo alterado',
+        AppState.mode === 'demo'
+          ? 'Operando em Modo Demonstração com dados locais do SENAI.'
+          : `Conectado ao Modo API Spring Boot (${AppState.apiUrl}).`,
+        'info'
+      );
+      if (AppState.token) {
+        loadRoute(AppState.currentRoute);
+      }
+    }
+
+    function setApiUrl(url) {
+      const clean = (url || 'http://localhost:8080').trim();
+      AppState.apiUrl = clean;
+      SafeStorage.set(STORAGE_KEYS.API_URL, clean);
+      const topApiInput = document.getElementById('topbar-api-url');
+      if (topApiInput) {
+        topApiInput.value = clean;
+      }
+    }
+
+    function showAuthAlert(target, msg, type = 'error') {
+      const box = document.getElementById(target === 'signup' ? 'signup-alert' : 'login-alert');
+      if (!box) return;
+      if (!msg) {
+        box.style.display = 'none';
+        box.textContent = '';
+      } else {
+        box.className = `alert ${type === 'success' ? 'alert-success' : 'alert-error'}`;
+        box.textContent = msg;
+        box.style.display = 'block';
+      }
+    }
+
+    function showAuthCard(card) {
+      const loginCard = document.getElementById('login-card');
+      const signupCard = document.getElementById('signup-card');
+      showAuthAlert('login', '');
+      showAuthAlert('signup', '');
+      if (loginCard && signupCard) {
+        if (card === 'signup') {
+          loginCard.classList.add('hidden');
+          signupCard.classList.remove('hidden');
+        } else {
+          signupCard.classList.add('hidden');
+          loginCard.classList.remove('hidden');
+        }
+      }
+    }
+
+    function enterApp(token, userInfo) {
+      const safeUser = userInfo && typeof userInfo === 'object' ? userInfo : { nome: 'Usuário', email: '' };
+      AppState.token = token;
+      AppState.user = safeUser;
+      SafeStorage.set(STORAGE_KEYS.TOKEN, token);
+      SafeStorage.setJSON(STORAGE_KEYS.USER, safeUser);
+
+      const nameEl = document.getElementById('sidebar-user-name');
+      const emailEl = document.getElementById('sidebar-user-email');
+      const avatarEl = document.getElementById('sidebar-user-avatar');
+      if (nameEl) nameEl.textContent = safeUser.nome || 'Usuário Autenticado';
+      if (emailEl) emailEl.textContent = safeUser.email || '';
+      if (avatarEl) avatarEl.textContent = getInitials(safeUser.nome || safeUser.email);
+
+      const authView = document.getElementById('auth-view');
+      const appView = document.getElementById('app-view');
+      if (authView) authView.classList.add('hidden');
+      if (appView) appView.classList.remove('hidden');
+
+      syncModeUI();
+      loadRoute('dashboard');
+    }
+
+    function logout(notify = true) {
+      AppState.token = null;
+      AppState.user = null;
+      SafeStorage.remove(STORAGE_KEYS.TOKEN);
+      SafeStorage.remove(STORAGE_KEYS.USER);
+
+      const appView = document.getElementById('app-view');
+      const authView = document.getElementById('auth-view');
+      if (appView) appView.classList.add('hidden');
+      if (authView) authView.classList.remove('hidden');
+
+      showAuthCard('login');
+      syncModeUI();
+
+      if (notify) {
+        showToast('Sessão encerrada', 'Você saiu do SAGSA com segurança.', 'info');
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 7. CARREGAMENTO DE DADOS E NAVEGAÇÃO
+    // --------------------------------------------------------------------------
+    async function fetchAllCoreData() {
+      const endpoints = [
+        ['cursos', '/api/cursos'],
+        ['ppcs', '/api/ppcs'],
+        ['modulos', '/api/modulos'],
+        ['capacidades', '/api/capacidades'],
+        ['criterios', '/api/criterios'],
+        ['sapzs', '/api/sapzs'],
+        ['atividades', '/api/atividades'],
+        ['usuarios', '/api/usuarios']
+      ];
+
+      const results = await Promise.allSettled(
+        endpoints.map(([, url]) => ApiService.request(url))
+      );
+
+      results.forEach((res, idx) => {
+        const key = endpoints[idx][0];
+        if (res.status === 'fulfilled' && Array.isArray(res.value)) {
+          AppState.cache[key] = res.value;
+        }
+      });
+    }
+
+    async function loadRoute(route) {
+      AppState.currentRoute = route;
+      AppState.searchQuery = '';
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.route === route);
+      });
+
+      const meta = ROUTE_META[route] || ROUTE_META.dashboard;
+      const titleEl = document.getElementById('topbar-title');
+      const subtitleEl = document.getElementById('topbar-subtitle');
+      if (titleEl) titleEl.textContent = meta.title;
+      if (subtitleEl) subtitleEl.textContent = meta.subtitle;
+
+      toggleMobileSidebar(false);
+
+      const main = document.getElementById('main-content');
+      if (!main) return;
+      main.innerHTML = `<div class="panel-card"><div class="empty-state"><p>Carregando dados...</p></div></div>`;
+
+      try {
+        await fetchAllCoreData();
+        renderCurrentRoute();
+      } catch (err) {
+        showToast('Erro ao carregar dados', err.message, 'error');
+        main.innerHTML = `
+          <div class="panel-card">
+            <div class="empty-state">
+              <h4>Não foi possível carregar os dados</h4>
+              <p>${escapeHTML(err.message)}</p>
+            </div>
+          </div>`;
+      }
+    }
+
+    function renderCurrentRoute() {
+      switch (AppState.currentRoute) {
+        case 'dashboard': renderDashboard(); break;
+        case 'sapzs': renderSapzs(); break;
+        case 'atividades': renderAtividades(); break;
+        case 'cursos': renderCursos(); break;
+        case 'ppcs': renderPpcs(); break;
+        case 'modulos': renderModulos(); break;
+        case 'capacidades': renderCapacidades(); break;
+        case 'criterios': renderCriterios(); break;
+        case 'usuarios': renderUsuarios(); break;
+        case 'arquitetura': renderArquitetura(); break;
+        default: renderDashboard();
+      }
+    }
+
+    // --------------------------------------------------------------------------
+    // 8. RENDERIZADORES DAS TELAS
+    // --------------------------------------------------------------------------
+
+    // --- 8.1 DASHBOARD ---
+    function renderDashboard() {
+      const { cursos, modulos, sapzs, atividades, usuarios } = AppState.cache;
+      const latestSapzs = [...sapzs].sort((a, b) => (b.id || 0) - (a.id || 0)).slice(0, 5);
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="kpi-grid">
+          <div class="kpi-card orange">
+            <div class="kpi-info"><span>SAPZs Geradas</span><strong>${sapzs.length}</strong></div>
+            <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-info"><span>Cursos</span><strong>${cursos.length}</strong></div>
+            <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
+          </div>
+          <div class="kpi-card navy">
+            <div class="kpi-info"><span>Módulos</span><strong>${modulos.length}</strong></div>
+            <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          </div>
+          <div class="kpi-card green">
+            <div class="kpi-info"><span>Atividades</span><strong>${atividades.length}</strong></div>
+            <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-info"><span>Docentes / Usuários</span><strong>${usuarios.length}</strong></div>
+            <div class="kpi-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Últimas Situações de Aprendizagem (SAPZ)</h3>
+              <button type="button" class="btn btn-outline btn-sm" onclick="loadRoute('sapzs')">Ver todas</button>
+            </div>
+            <div class="table-responsive">
+              ${latestSapzs.length ? `
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Título</th>
+                      <th>Docente</th>
+                      <th>Carga Horária</th>
+                      <th>Data</th>
+                      <th style="text-align:right;">Ação</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${latestSapzs.map(s => `
+                      <tr>
+                        <td><strong>${escapeHTML(s.titulo)}</strong></td>
+                        <td>${escapeHTML(s.nomeUsuario || '—')}</td>
+                        <td><span class="badge badge-blue">${s.cargaHorariaTotal}h</span></td>
+                        <td>${formatDateTime(s.dataGeracao)}</td>
+                        <td class="actions-cell">
+                          <button type="button" class="btn btn-info-soft" onclick="openSapzDetails(${s.id})">Ficha</button>
+                        </td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              ` : `<div class="empty-state"><h4>Nenhuma SAPZ cadastrada</h4><p>Crie sua primeira Situação de Aprendizagem usando os atalhos ao lado.</p></div>`}
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Atalhos Rápidos</h3>
+            </div>
+            <div class="panel-body">
+              <button type="button" class="quick-action-btn" onclick="openCreateSapzModal()">
+                <div class="quick-action-icon orange">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                </div>
+                <div>
+                  <strong style="display:block; color:var(--senai-navy); font-size:0.9rem;">Nova Situação de Aprendizagem</strong>
+                  <span style="font-size:0.78rem; color:var(--text-muted);">Criar SAPZ vinculada a um módulo</span>
+                </div>
+              </button>
+
+              <button type="button" class="quick-action-btn" onclick="openCreateCursoModal()">
+                <div class="quick-action-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/></svg>
+                </div>
+                <div>
+                  <strong style="display:block; color:var(--senai-navy); font-size:0.9rem;">Cadastrar Novo Curso</strong>
+                  <span style="font-size:0.78rem; color:var(--text-muted);">Adicionar curso e eixo tecnológico</span>
+                </div>
+              </button>
+
+              <button type="button" class="quick-action-btn" onclick="openCreateAtividadeModal()">
+                <div class="quick-action-icon" style="background-color: var(--success);">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="9 11 12 14 22 4"/></svg>
+                </div>
+                <div>
+                  <strong style="display:block; color:var(--senai-navy); font-size:0.9rem;">Nova Atividade</strong>
+                  <span style="font-size:0.78rem; color:var(--text-muted);">Vincular entregas e horas a uma SAPZ</span>
+                </div>
+              </button>
+
+              ${AppState.mode === 'demo' ? `
+                <div style="margin-top:16px; padding-top:14px; border-top:1px solid var(--border-color); text-align:center;">
+                  <button type="button" class="btn btn-outline btn-sm btn-block" onclick="resetDemoData()">
+                    Restaurar Dados de Demonstração SENAI
+                  </button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function resetDemoData() {
+      LocalDB.save(createInitialDemoDB());
+      showToast('Dados restaurados', 'A base de demonstração do SENAI foi redefinida.', 'success');
+      loadRoute(AppState.currentRoute);
+    }
+
+    // --- 8.2 SAPZs (/api/sapzs) ---
+    function renderSapzs() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.sapzs.filter(s =>
+        `${s.id} ${s.titulo} ${s.descricao} ${s.desafio} ${s.nomeUsuario || ''}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar SAPZ por título, desafio ou docente..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <div class="toolbar-actions">
+            <button type="button" class="btn btn-orange" onclick="openCreateSapzModal()">+ Nova SAPZ</button>
+          </div>
+        </div>
+
+        ${list.length ? `
+          <div class="sapz-grid">
+            ${list.map(s => {
+              const atividadesDaSapz = AppState.cache.atividades.filter(a => Number(a.idSapz) === Number(s.id));
+              const horasAtividades = atividadesDaSapz.reduce((sum, a) => sum + Number(a.cargaHoraria || 0), 0);
+              return `
+                <article class="sapz-card">
+                  <div class="sapz-card-body">
+                    <div class="sapz-card-top">
+                      <span class="badge badge-navy">#${s.id}</span>
+                      <span class="badge badge-blue">${s.cargaHorariaTotal}h Totais</span>
+                    </div>
+                    <h3 class="sapz-card-title">${escapeHTML(s.titulo)}</h3>
+                    <p class="sapz-card-desc">${escapeHTML(s.descricao)}</p>
+                    <div class="sapz-challenge-box">
+                      <strong>Desafio Proposto</strong>
+                      ${escapeHTML(s.desafio)}
+                    </div>
+                    <div class="sapz-meta-row">
+                      <span>Docente: <strong>${escapeHTML(s.nomeUsuario || 'Não informado')}</strong></span>
+                      <span>${atividadesDaSapz.length} ativ. (${horasAtividades}h)</span>
+                    </div>
+                    <div class="sapz-meta-row" style="margin-top:4px;">
+                      <span>Gerada em: ${formatDateTime(s.dataGeracao)}</span>
+                    </div>
+                  </div>
+                  <div class="sapz-card-footer">
+                    <button type="button" class="btn btn-info-soft" onclick="openSapzDetails(${s.id})">Ver Detalhes / Ficha</button>
+                    <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/sapzs/${s.id}', 'a SAPZ #${s.id}')">Excluir</button>
+                  </div>
+                </article>
+              `;
+            }).join('')}
+          </div>
+        ` : `<div class="panel-card"><div class="empty-state"><h4>Nenhuma SAPZ encontrada</h4><p>Tente outro termo de busca ou cadastre uma nova Situação de Aprendizagem.</p></div></div>`}
+      `;
+    }
+
+    function openCreateSapzModal() {
+      const modulosOpts = AppState.cache.modulos.map(m => `<option value="${m.id}">#${m.id} - ${escapeHTML(m.nomeModulo)}</option>`).join('');
+      const usuariosOpts = AppState.cache.usuarios.map(u => `<option value="${u.idUsuario}">${escapeHTML(u.nome)} (${escapeHTML(u.email)})</option>`).join('');
+
+      openFormModal('Nova Situação de Aprendizagem (SAPZ)', `
+        <div class="form-group">
+          <label class="form-label">Título da SAPZ <span class="req">*</span></label>
+          <input type="text" name="titulo" class="form-control" maxlength="100" placeholder="Ex: SAPZ 03 - Sistema de Controle de Estoque" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição / Contextualização <span class="req">*</span></label>
+          <textarea name="descricao" class="form-control" maxlength="255" placeholder="Descreva o contexto industrial e objetivos da situação..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Desafio Proposto <span class="req">*</span></label>
+          <textarea name="desafio" class="form-control" maxlength="255" placeholder="Qual problema real os estudantes deverão resolver?" required></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Carga Horária Total (h) <span class="req">*</span></label>
+            <input type="number" name="cargaHorariaTotal" class="form-control" min="1" placeholder="Ex: 40" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Módulo Curricular <span class="req">*</span></label>
+            <select name="idModulo" class="form-control" required>
+              <option value="">Selecione um módulo...</option>
+              ${modulosOpts}
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Docente Responsável <span class="req">*</span></label>
+          <select name="usuarioId" class="form-control" required>
+            <option value="">Selecione o docente...</option>
+            ${usuariosOpts}
+          </select>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/sapzs', {
+          method: 'POST',
+          body: {
+            titulo: data.titulo,
+            descricao: data.descricao,
+            desafio: data.desafio,
+            cargaHorariaTotal: Number(data.cargaHorariaTotal),
+            idModulo: Number(data.idModulo),
+            usuarioId: Number(data.usuarioId)
+          }
+        });
+        showToast('SAPZ criada!', 'Situação de Aprendizagem cadastrada com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    function openSapzDetails(sapzId) {
+      const sapz = AppState.cache.sapzs.find(s => Number(s.id) === Number(sapzId));
+      if (!sapz) return;
+
+      const atividades = AppState.cache.atividades.filter(a => Number(a.idSapz) === Number(sapz.id));
+      const somaHoras = atividades.reduce((acc, a) => acc + Number(a.cargaHoraria || 0), 0);
+      const pct = sapz.cargaHorariaTotal > 0 ? Math.min(100, Math.round((somaHoras / sapz.cargaHorariaTotal) * 100)) : 0;
+
+      document.getElementById('sapz-print-area').innerHTML = `
+        <div class="ficha-header">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <svg width="42" height="42" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="flex-shrink:0;">
+              <rect width="48" height="48" rx="10" fill="#0047B6"/>
+              <path d="M10 14H38V20H18L10 14Z" fill="#FFFFFF"/>
+              <path d="M10 24H34L28 30H10V24Z" fill="#F37021"/>
+              <path d="M10 34H38V38H10V34Z" fill="#FFFFFF" fill-opacity="0.85"/>
+            </svg>
+            <div>
+              <div style="font-size:0.72rem; font-weight:800; color:var(--senai-orange); letter-spacing:0.05em; text-transform:uppercase;">
+                ${escapeHTML(INSTITUTION_INFO.unidade)} — ${escapeHTML(INSTITUTION_INFO.cidade)}
+              </div>
+              <div style="font-size:0.76rem; color:var(--text-muted); font-weight:600;">
+                ${escapeHTML(INSTITUTION_INFO.curso)} • Turma ${escapeHTML(INSTITUTION_INFO.turma)} • Ficha SAGSA
+              </div>
+              <h2 style="font-size:1.25rem; color:var(--senai-navy); margin-top:4px;">${escapeHTML(sapz.titulo)}</h2>
+            </div>
+          </div>
+          <span class="badge badge-blue">SAPZ #${sapz.id}</span>
+        </div>
+
+        <div class="ficha-grid">
+          <div class="ficha-meta-box">
+            <small>Docente Responsável</small>
+            <strong>${escapeHTML(sapz.nomeUsuario || 'Não informado')}</strong>
+          </div>
+          <div class="ficha-meta-box">
+            <small>Carga Horária Prevista</small>
+            <strong>${sapz.cargaHorariaTotal} horas</strong>
+          </div>
+          <div class="ficha-meta-box">
+            <small>Data de Geração</small>
+            <strong>${formatDateTime(sapz.dataGeracao)}</strong>
+          </div>
+        </div>
+
+        <div class="ficha-section">
+          <h4>Contextualização / Descrição</h4>
+          <p style="font-size:0.92rem; color:var(--text-dark);">${escapeHTML(sapz.descricao)}</p>
+        </div>
+
+        <div class="ficha-section">
+          <h4>Desafio Proposto</h4>
+          <div class="sapz-challenge-box" style="margin-bottom:0; font-size:0.9rem;">
+            ${escapeHTML(sapz.desafio)}
+          </div>
+        </div>
+
+        <div class="ficha-section">
+          <h4>Atividades Vinculadas (${atividades.length})</h4>
+          <div style="background:var(--bg-gray); padding:12px 14px; border-radius:var(--radius-sm); border:1px solid var(--border-color); margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.84rem; font-weight:600;">
+              <span>Distribuição da Carga Horária das Atividades</span>
+              <span style="color:${somaHoras > sapz.cargaHorariaTotal ? 'var(--danger)' : 'var(--senai-blue)'};">
+                ${somaHoras}h / ${sapz.cargaHorariaTotal}h (${pct}%)
+              </span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" style="width:${pct}%;"></div>
+            </div>
+          </div>
+
+          ${atividades.length ? `
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Descrição da Atividade</th>
+                    <th style="text-align:right;">Carga Horária</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${atividades.map(a => `
+                    <tr>
+                      <td>#${a.id}</td>
+                      <td>${escapeHTML(a.descricaoAtividade)}</td>
+                      <td style="text-align:right;"><strong>${a.cargaHoraria}h</strong></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          ` : `<p style="font-size:0.88rem; color:var(--text-muted);">Nenhuma atividade vinculada a esta SAPZ até o momento.</p>`}
+        </div>
+      `;
+
+      openModal('sapz-detail-modal');
+    }
+
+    // --- 8.3 ATIVIDADES (/api/atividades) ---
+    function renderAtividades() {
+      const q = AppState.searchQuery.toLowerCase();
+      const sapzMap = Object.fromEntries(AppState.cache.sapzs.map(s => [Number(s.id), s.titulo]));
+
+      const list = AppState.cache.atividades.filter(a => {
+        const tituloSapz = sapzMap[Number(a.idSapz)] || `SAPZ #${a.idSapz}`;
+        return `${a.id} ${a.descricaoAtividade} ${tituloSapz}`.toLowerCase().includes(q);
+      });
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar atividade ou título da SAPZ..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateAtividadeModal()">+ Nova Atividade</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Descrição da Atividade</th>
+                    <th>SAPZ Vinculada</th>
+                    <th>Carga Horária</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(a => `
+                    <tr>
+                      <td><strong>#${a.id}</strong></td>
+                      <td>${escapeHTML(a.descricaoAtividade)}</td>
+                      <td><span class="badge badge-blue">${escapeHTML(sapzMap[Number(a.idSapz)] || `SAPZ #${a.idSapz}`)}</span></td>
+                      <td><span class="badge badge-orange">${a.cargaHoraria}h</span></td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/atividades/${a.id}', 'a atividade #${a.id}')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhuma atividade encontrada</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateAtividadeModal() {
+      const sapzOpts = AppState.cache.sapzs.map(s => `<option value="${s.id}">#${s.id} - ${escapeHTML(s.titulo)}</option>`).join('');
+      openFormModal('Nova Atividade', `
+        <div class="form-group">
+          <label class="form-label">SAPZ Vinculada <span class="req">*</span></label>
+          <select name="idSapz" class="form-control" required>
+            <option value="">Selecione uma SAPZ...</option>
+            ${sapzOpts}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição da Atividade <span class="req">*</span></label>
+          <textarea name="descricaoAtividade" class="form-control" placeholder="Descreva a entrega ou etapa prática..." required></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carga Horária (horas) <span class="req">*</span></label>
+          <input type="number" name="cargaHoraria" class="form-control" min="1" placeholder="Ex: 8" required />
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/atividades', {
+          method: 'POST',
+          body: {
+            descricaoAtividade: data.descricaoAtividade,
+            cargaHoraria: Number(data.cargaHoraria),
+            idSapz: Number(data.idSapz)
+          }
+        });
+        showToast('Atividade criada!', 'Atividade vinculada à SAPZ com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.4 CURSOS (/api/cursos) ---
+    function renderCursos() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.cursos.filter(c =>
+        `${c.id} ${c.nomeCurso} ${c.eixoTecnologico}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar curso ou eixo tecnológico..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateCursoModal()">+ Novo Curso</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome do Curso</th>
+                    <th>Eixo Tecnológico</th>
+                    <th>Carga Horária Total</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(c => `
+                    <tr>
+                      <td><strong>#${c.id}</strong></td>
+                      <td><strong>${escapeHTML(c.nomeCurso)}</strong></td>
+                      <td><span class="badge badge-navy">${escapeHTML(c.eixoTecnologico)}</span></td>
+                      <td><span class="badge badge-blue">${c.cargaHorariaTotal}h</span></td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/cursos/${c.id}', 'o curso #${c.id}')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhum curso encontrado</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateCursoModal() {
+      openFormModal('Novo Curso SENAI', `
+        <div class="form-group">
+          <label class="form-label">Nome do Curso <span class="req">*</span></label>
+          <input type="text" name="nomeCurso" class="form-control" maxlength="150" placeholder="Ex: Técnico em Eletrotécnica" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Eixo Tecnológico <span class="req">*</span></label>
+          <input type="text" name="eixoTecnologico" class="form-control" maxlength="100" placeholder="Ex: Controle e Processos Industriais" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Carga Horária Total (horas) <span class="req">*</span></label>
+          <input type="number" name="cargaHorariaTotal" class="form-control" min="1" placeholder="Ex: 1200" required />
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/cursos', {
+          method: 'POST',
+          body: {
+            nomeCurso: data.nomeCurso,
+            eixoTecnologico: data.eixoTecnologico,
+            cargaHorariaTotal: Number(data.cargaHorariaTotal)
+          }
+        });
+        showToast('Curso cadastrado!', 'O novo curso foi adicionado com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.5 PPCs (/api/ppcs) ---
+    function renderPpcs() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.ppcs.filter(p =>
+        `${p.id} ${p.anoVigencia} ${p.nomeCurso || ''}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar PPC por ano ou curso..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreatePpcModal()">+ Novo PPC</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Ano de Vigência</th>
+                    <th>Curso Vinculado</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(p => `
+                    <tr>
+                      <td><strong>#${p.id}</strong></td>
+                      <td><span class="badge badge-orange">${p.anoVigencia}</span></td>
+                      <td><strong>${escapeHTML(p.nomeCurso || '—')}</strong></td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/ppcs/${p.id}', 'o PPC #${p.id} (${p.anoVigencia})')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhum PPC encontrado</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreatePpcModal() {
+      const cursoOpts = AppState.cache.cursos.map(c => `<option value="${c.id}">#${c.id} - ${escapeHTML(c.nomeCurso)}</option>`).join('');
+      openFormModal('Novo Projeto Pedagógico de Curso (PPC)', `
+        <div class="form-group">
+          <label class="form-label">Ano de Vigência <span class="req">*</span></label>
+          <input type="number" name="anoVigencia" class="form-control" min="2000" max="2100" value="2026" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Curso <span class="req">*</span></label>
+          <select name="idCurso" class="form-control" required>
+            <option value="">Selecione um curso...</option>
+            ${cursoOpts}
+          </select>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/ppcs', {
+          method: 'POST',
+          body: {
+            anoVigencia: Number(data.anoVigencia),
+            idCurso: Number(data.idCurso)
+          }
+        });
+        showToast('PPC cadastrado!', 'Projeto Pedagógico salvo com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.6 MÓDULOS (/api/modulos) ---
+    function renderModulos() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.modulos.filter(m =>
+        `${m.id} ${m.nomeModulo} ${m.descricao}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar módulo por nome ou descrição..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateModuloModal()">+ Novo Módulo</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome do Módulo</th>
+                    <th>Descrição</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(m => `
+                    <tr>
+                      <td><strong>#${m.id}</strong></td>
+                      <td><strong>${escapeHTML(m.nomeModulo)}</strong></td>
+                      <td>${escapeHTML(m.descricao)}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/modulos/${m.id}', 'o módulo #${m.id}')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhum módulo encontrado</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateModuloModal() {
+      const ppcOpts = AppState.cache.ppcs.map(p => `<option value="${p.id}">PPC #${p.id} - ${escapeHTML(p.nomeCurso || '')} (${p.anoVigencia})</option>`).join('');
+      openFormModal('Novo Módulo Curricular', `
+        <div class="form-group">
+          <label class="form-label">PPC Vinculado <span class="req">*</span></label>
+          <select name="idPpc" class="form-control" required>
+            <option value="">Selecione um PPC...</option>
+            ${ppcOpts}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nome do Módulo <span class="req">*</span></label>
+          <input type="text" name="nomeModulo" class="form-control" maxlength="100" placeholder="Ex: Módulo III - Testes e Implantação" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição <span class="req">*</span></label>
+          <textarea name="descricao" class="form-control" maxlength="255" placeholder="Resumo das competências do módulo..." required></textarea>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/modulos', {
+          method: 'POST',
+          body: {
+            idPpc: Number(data.idPpc),
+            nomeModulo: data.nomeModulo,
+            descricao: data.descricao
+          }
+        });
+        showToast('Módulo criado!', 'Módulo curricular cadastrado com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.7 CAPACIDADES (/api/capacidades) ---
+    function getCapacidadeBadge(tipo) {
+      const t = (tipo || '').toLowerCase();
+      if (t.includes('téc') || t.includes('tec')) return 'badge-blue';
+      if (t.includes('socio')) return 'badge-orange';
+      return 'badge-green';
+    }
+
+    function renderCapacidades() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.capacidades.filter(c =>
+        `${c.id} ${c.tipoCapacidade} ${c.descricao}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar capacidade por tipo ou descrição..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateCapacidadeModal()">+ Nova Capacidade</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tipo</th>
+                    <th>Descrição da Capacidade</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(c => `
+                    <tr>
+                      <td><strong>#${c.id}</strong></td>
+                      <td><span class="badge ${getCapacidadeBadge(c.tipoCapacidade)}">${escapeHTML(c.tipoCapacidade)}</span></td>
+                      <td>${escapeHTML(c.descricao)}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/capacidades/${c.id}', 'a capacidade #${c.id}')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhuma capacidade encontrada</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateCapacidadeModal() {
+      const modOpts = AppState.cache.modulos.map(m => `<option value="${m.id}">#${m.id} - ${escapeHTML(m.nomeModulo)}</option>`).join('');
+      openFormModal('Nova Capacidade', `
+        <div class="form-group">
+          <label class="form-label">Módulo Curricular <span class="req">*</span></label>
+          <select name="idModulo" class="form-control" required>
+            <option value="">Selecione um módulo...</option>
+            ${modOpts}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de Capacidade <span class="req">*</span></label>
+          <select name="tipoCapacidade" class="form-control" required>
+            <option value="Técnica">Técnica</option>
+            <option value="Socioemocional">Socioemocional</option>
+            <option value="Básica">Básica</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição <span class="req">*</span></label>
+          <textarea name="descricao" class="form-control" maxlength="255" placeholder="Descreva a capacidade a ser desenvolvida..." required></textarea>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/capacidades', {
+          method: 'POST',
+          body: {
+            idModulo: Number(data.idModulo),
+            tipoCapacidade: data.tipoCapacidade,
+            descricao: data.descricao
+          }
+        });
+        showToast('Capacidade criada!', 'Capacidade registrada com sucesso.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.8 CRITÉRIOS DE AVALIAÇÃO (/api/criterios) ---
+    function renderCriterios() {
+      const q = AppState.searchQuery.toLowerCase();
+      const capMap = Object.fromEntries(AppState.cache.capacidades.map(c => [Number(c.id), c.descricao]));
+
+      const list = AppState.cache.criterios.filter(cr => {
+        const capDesc = capMap[Number(cr.idCapacidade)] || `Capacidade #${cr.idCapacidade}`;
+        return `${cr.id} ${cr.descricao} ${capDesc}`.toLowerCase().includes(q);
+      });
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar critério ou capacidade..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateCriterioModal()">+ Novo Critério</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Descrição do Critério</th>
+                    <th>Capacidade Vinculada</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(cr => `
+                    <tr>
+                      <td><strong>#${cr.id}</strong></td>
+                      <td>${escapeHTML(cr.descricao)}</td>
+                      <td style="color:var(--text-muted); font-size:0.83rem;">${escapeHTML(capMap[Number(cr.idCapacidade)] || `Capacidade #${cr.idCapacidade}`)}</td>
+                      <td class="actions-cell">
+                        <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/criterios/${cr.id}', 'o critério #${cr.id}')">Excluir</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhum critério encontrado</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateCriterioModal() {
+      const capOpts = AppState.cache.capacidades.map(c => `<option value="${c.id}">#${c.id} [${escapeHTML(c.tipoCapacidade)}] ${escapeHTML(String(c.descricao || '').slice(0, 75))}</option>`).join('');
+      openFormModal('Novo Critério de Avaliação', `
+        <div class="form-group">
+          <label class="form-label">Capacidade Vinculada <span class="req">*</span></label>
+          <select name="idCapacidade" class="form-control" required>
+            <option value="">Selecione uma capacidade...</option>
+            ${capOpts}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição do Critério <span class="req">*</span></label>
+          <textarea name="descricao" class="form-control" maxlength="255" placeholder="Descreva o critério observável de avaliação..." required></textarea>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/criterios', {
+          method: 'POST',
+          body: {
+            descricao: data.descricao,
+            idCapacidade: Number(data.idCapacidade)
+          }
+        });
+        showToast('Critério cadastrado!', 'Critério de avaliação adicionado.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.9 USUÁRIOS / DOCENTES (/api/usuarios) ---
+    function renderUsuarios() {
+      const q = AppState.searchQuery.toLowerCase();
+      const list = AppState.cache.usuarios.filter(u =>
+        `${u.idUsuario} ${u.nome} ${u.email} ${u.tipoPerfil}`.toLowerCase().includes(q)
+      );
+
+      document.getElementById('main-content').innerHTML = `
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Buscar usuário por nome, e-mail ou perfil..." value="${escapeHTML(AppState.searchQuery)}" oninput="onSearchInput(this.value)" />
+          </div>
+          <button type="button" class="btn btn-primary" onclick="openCreateUsuarioModal()">+ Novo Usuário</button>
+        </div>
+
+        <div class="panel-card">
+          <div class="table-responsive">
+            ${list.length ? `
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Perfil</th>
+                    <th style="text-align:right;">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${list.map(u => {
+                    const isAdmin = u.tipoPerfil === 'ROLE_ADMIN';
+                    return `
+                      <tr>
+                        <td><strong>#${u.idUsuario}</strong></td>
+                        <td><strong>${escapeHTML(u.nome)}</strong></td>
+                        <td>${escapeHTML(u.email)}</td>
+                        <td><span class="badge ${isAdmin ? 'badge-orange' : 'badge-blue'}">${isAdmin ? 'Admin' : 'Docente'}</span></td>
+                        <td class="actions-cell">
+                          <button type="button" class="btn btn-danger-soft" onclick="confirmDelete('/api/usuarios/${u.idUsuario}', 'o usuário #${u.idUsuario}')">Excluir</button>
+                        </td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            ` : `<div class="empty-state"><h4>Nenhum usuário encontrado</h4></div>`}
+          </div>
+        </div>
+      `;
+    }
+
+    function openCreateUsuarioModal() {
+      openFormModal('Novo Usuário / Docente', `
+        <div class="form-group">
+          <label class="form-label">Nome Completo <span class="req">*</span></label>
+          <input type="text" name="nome" class="form-control" minlength="2" maxlength="100" placeholder="Ex: Profa. Fernanda Lima" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label">E-mail <span class="req">*</span></label>
+          <input type="email" name="email" class="form-control" placeholder="fernanda.lima@senai.br" required />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Senha (mín. 6) <span class="req">*</span></label>
+            <input type="password" name="senha" class="form-control" minlength="6" placeholder="••••••" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipo de Perfil <span class="req">*</span></label>
+            <select name="tipoPerfil" class="form-control" required>
+              <option value="ROLE_DOCENTE">Docente (ROLE_DOCENTE)</option>
+              <option value="ROLE_ADMIN">Administrador (ROLE_ADMIN)</option>
+            </select>
+          </div>
+        </div>
+      `, async (data) => {
+        await ApiService.request('/api/usuarios', {
+          method: 'POST',
+          body: {
+            nome: data.nome,
+            email: data.email,
+            senha: data.senha,
+            tipoPerfil: data.tipoPerfil
+          }
+        });
+        showToast('Usuário cadastrado!', 'Novo usuário adicionado ao sistema.', 'success');
+        await loadRoute(AppState.currentRoute);
+      });
+    }
+
+    // --- 8.10 ARQUITETURA & PROJETO ---
+    function renderArquitetura() {
+      document.getElementById('main-content').innerHTML = `
+        <div class="arch-layout">
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Arquitetura em Camadas do SAGSA</h3>
+              <span class="badge badge-blue">Padrão Adotado</span>
+            </div>
+            <div class="panel-body">
+              <div class="arch-diagram">
+                <div class="arch-layer">
+                  <div class="arch-layer-top">
+                    <strong>1. Camada de Interface (Front-end)</strong>
+                    <span class="badge badge-blue">HTML5 • CSS3 • JS ES6+</span>
+                  </div>
+                  <p>
+                    Recebe as informações do professor/docente, valida os formulários de Cursos, PPCs, Módulos,
+                    Capacidades, Critérios, SAPZs e Atividades, e exibe as fichas pedagógicas.
+                  </p>
+                  <div class="arch-tags">
+                    <span class="arch-tag">SPA Responsiva</span>
+                    <span class="arch-tag">Fetch API + Bearer JWT</span>
+                    <span class="arch-tag">Impressão de Ficha SAPZ</span>
+                  </div>
+                </div>
+
+                <div class="arch-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                  Requisições REST JSON (/login, /api/*)
+                </div>
+
+                <div class="arch-layer layer-core">
+                  <div class="arch-layer-top">
+                    <strong>2. Camada Core / Regras de Negócio (Backend)</strong>
+                    <span class="badge badge-orange">Spring Boot • Security JWT</span>
+                  </div>
+                  <p>
+                    Recebe as requisições via Controllers, autentica usuários com Spring Security + JWT, aplica
+                    as regras de negócio nos Services, valida DTOs e coordena a geração das SAPZs.
+                  </p>
+                  <div class="arch-tags">
+                    <span class="arch-tag">Controllers (/api/*)</span>
+                    <span class="arch-tag">Services</span>
+                    <span class="arch-tag">DTOs &amp; Bean Validation</span>
+                    <span class="arch-tag">GlobalExceptionHandler</span>
+                  </div>
+                </div>
+
+                <div class="arch-arrow">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                  Consultas e Persistência ORM (Spring Data JPA)
+                </div>
+
+                <div class="arch-layer layer-data">
+                  <div class="arch-layer-top">
+                    <strong>3. Camada de Dados (Persistência)</strong>
+                    <span class="badge badge-navy">Repositories • JPA • MySQL</span>
+                  </div>
+                  <p>
+                    Consulta e salva todas as entidades relacionais no banco de dados (Docentes, Cursos, PPCs,
+                    Módulos, Capacidades, Critérios, SAPZs e Atividades), garantindo integridade referencial.
+                  </p>
+                  <div class="arch-tags">
+                    <span class="arch-tag">Repositories (JPA)</span>
+                    <span class="arch-tag">Models / Entities</span>
+                    <span class="arch-tag">Banco de Dados MySQL</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="arch-pros-cons">
+                <div class="arch-note-box pro">
+                  <strong>Principal Vantagem</strong>
+                  Mantém as responsabilidades bem separadas entre interface, regras de negócio e banco de dados,
+                  facilitando testes, manutenção e evoluções futuras sem a complexidade desnecessária de microsserviços ou arquitetura hexagonal.
+                </div>
+                <div class="arch-note-box con">
+                  <strong>Ponto de Atenção / Desvantagem</strong>
+                  Exige maior número de classes (DTOs, Controllers, Services, Repositories) e boa disciplina de organização
+                  para não se tornar burocrática caso seja mal dividida.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel-card">
+            <div class="panel-header">
+              <h3>Dados Institucionais &amp; Equipe</h3>
+              <span class="badge badge-orange">SENAI RS</span>
+            </div>
+            <div class="panel-body">
+              <div class="inst-meta-list">
+                <div class="inst-meta-item">
+                  <small>Unidade Operacional</small>
+                  <strong>${escapeHTML(INSTITUTION_INFO.unidade)}</strong>
+                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">${escapeHTML(INSTITUTION_INFO.cidade)}</div>
+                </div>
+
+                <div class="inst-meta-item">
+                  <small>Curso</small>
+                  <strong>${escapeHTML(INSTITUTION_INFO.curso)}</strong>
+                </div>
+
+                <div class="inst-meta-item">
+                  <small>Turma</small>
+                  <strong>${escapeHTML(INSTITUTION_INFO.turma)}</strong>
+                </div>
+
+                <div class="inst-meta-item">
+                  <small>Equipe de Desenvolvimento</small>
+                  <div class="team-chips">
+                    ${INSTITUTION_INFO.equipe.map(nome => `<span class="badge badge-blue">${escapeHTML(nome)}</span>`).join('')}
+                  </div>
+                </div>
+
+                <div class="inst-meta-item">
+                  <small>Padrão Arquitetural &amp; Documentação</small>
+                  <strong>${escapeHTML(INSTITUTION_INFO.arquitetura)}</strong>
+                  <div style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+                    Definição de Arquitetura de Sistema — São Leopoldo, ${escapeHTML(INSTITUTION_INFO.dataDoc)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // --------------------------------------------------------------------------
+    // 9. AÇÕES COMPARTILHADAS (BUSCA, EXCLUSÃO, SIDEBAR MOBILE)
+    // --------------------------------------------------------------------------
+    function onSearchInput(val) {
+      AppState.searchQuery = val;
+      renderCurrentRoute();
+      const input = document.querySelector('.search-box input');
+      if (input) {
+        input.focus();
+        try {
+          input.setSelectionRange(val.length, val.length);
+        } catch {
+          // Ignora caso o tipo de input não suporte setSelectionRange
+        }
+      }
+    }
+
+    function confirmDelete(endpoint, label) {
+      openConfirmModal(`Tem certeza que deseja excluir ${label}? Esta ação não poderá ser desfeita.`, async () => {
+        try {
+          await ApiService.request(endpoint, { method: 'DELETE' });
+          closeModal('confirm-modal');
+          showToast('Excluído', 'Registro removido com sucesso.', 'success');
+          await loadRoute(AppState.currentRoute);
+        } catch (err) {
+          closeModal('confirm-modal');
+          showToast('Erro ao excluir', err.message, 'error');
+        }
+      });
+    }
+
+    function toggleMobileSidebar(open) {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      if (sidebar) sidebar.classList.toggle('open', open);
+      if (overlay) overlay.classList.toggle('open', open);
+    }
+
+    // --------------------------------------------------------------------------
+    // 10. EVENT LISTENERS E INICIALIZAÇÃO SEGURA
+    // --------------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        syncModeUI();
+
+        // Alternância de Modo na Topbar interna
+        const topbarModeSelect = document.getElementById('topbar-mode-select');
+        if (topbarModeSelect) {
+          topbarModeSelect.addEventListener('change', (e) => setAppMode(e.target.value));
+        }
+
+        const topbarApiUrl = document.getElementById('topbar-api-url');
+        if (topbarApiUrl) {
+          topbarApiUrl.addEventListener('change', (e) => {
+            setApiUrl(e.target.value);
+            if (AppState.mode === 'api' && AppState.token) {
+              loadRoute(AppState.currentRoute);
+            }
+          });
+        }
+
+        // Alternância entre Card de Login e Card de Cadastro
+        const linkToSignup = document.getElementById('link-to-signup');
+        if (linkToSignup) {
+          linkToSignup.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthCard('signup');
+          });
+        }
+
+        const linkToLogin = document.getElementById('link-to-login');
+        if (linkToLogin) {
+          linkToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            showAuthCard('login');
+          });
+        }
+
+        // Submit Login (POST /login)
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+          loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showAuthAlert('login', '');
+
+            const email = document.getElementById('username').value.trim();
+            const senha = document.getElementById('login-password').value;
+            const submitBtn = loginForm.querySelector('button[type="submit"]');
+
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Entrando...';
+            }
+
+            try {
+              const res = await ApiService.request('/login', {
+                method: 'POST',
+                skipAuth: true,
+                body: { email, senha }
+              });
+
+              const userInfo = (res && res.user) ? res.user : { nome: email.split('@')[0], email };
+              showToast('Bem-vindo ao SAGSA!', 'Autenticação realizada com sucesso.', 'success');
+              enterApp(res.token, userInfo);
+            } catch (err) {
+              showAuthAlert('login', err.message, 'error');
+            } finally {
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Entrar';
+              }
+            }
+          });
+        }
+
+        // Submit Cadastro (POST /api/usuarios)
+        const signupForm = document.getElementById('signupForm');
+        if (signupForm) {
+          signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showAuthAlert('signup', '');
+
+            const nome = document.getElementById('nome').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const senha = document.getElementById('signup-password').value;
+            const tipoPerfil = document.getElementById('tipoPerfil').value;
+            const submitBtn = signupForm.querySelector('button[type="submit"]');
+
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Cadastrando...';
+            }
+
+            try {
+              await ApiService.request('/api/usuarios', {
+                method: 'POST',
+                skipAuth: true,
+                body: { nome, email, senha, tipoPerfil }
+              });
+
+              showAuthAlert('signup', 'Conta criada com sucesso! Clique em "Faça Login" para entrar.', 'success');
+              signupForm.reset();
+              const usernameInput = document.getElementById('username');
+              if (usernameInput) usernameInput.value = email;
+              showToast('Conta criada!', 'Cadastro realizado com sucesso.', 'success');
+            } catch (err) {
+              showAuthAlert('signup', err.message, 'error');
+            } finally {
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Cadastrar';
+              }
+            }
+          });
+        }
+
+        // Navegação da Sidebar
+        document.querySelectorAll('.nav-item').forEach(btn => {
+          btn.addEventListener('click', () => loadRoute(btn.dataset.route));
+        });
+
+        // Sidebar Mobile
+        const btnOpenSidebar = document.getElementById('btn-open-sidebar');
+        if (btnOpenSidebar) btnOpenSidebar.addEventListener('click', () => toggleMobileSidebar(true));
+
+        const btnCloseSidebar = document.getElementById('btn-close-sidebar');
+        if (btnCloseSidebar) btnCloseSidebar.addEventListener('click', () => toggleMobileSidebar(false));
+
+        const sidebarOverlay = document.getElementById('sidebar-overlay');
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', () => toggleMobileSidebar(false));
+
+        // Logout
+        const btnLogout = document.getElementById('btn-logout');
+        if (btnLogout) btnLogout.addEventListener('click', () => logout(true));
+
+        // Fechar Modais
+        document.querySelectorAll('[data-close-modal]').forEach(btn => {
+          btn.addEventListener('click', () => closeModal(btn.dataset.closeModal));
+        });
+
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+          backdrop.addEventListener('click', (e) => {
+            if (e.target === backdrop) backdrop.classList.add('hidden');
+          });
+        });
+
+        // Submit do Modal Genérico de Formulário
+        const dynamicModalForm = document.getElementById('dynamic-modal-form');
+        if (dynamicModalForm) {
+          dynamicModalForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentFormSubmitHandler) return;
+
+            const errBox = document.getElementById('modal-form-error');
+            if (errBox) errBox.classList.add('hidden');
+
+            const submitBtn = document.getElementById('form-modal-submit');
+            if (submitBtn) {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Salvando...';
+            }
+
+            try {
+              const formData = new FormData(e.target);
+              const payload = Object.fromEntries(formData.entries());
+              await currentFormSubmitHandler(payload);
+              closeModal('form-modal');
+            } catch (err) {
+              if (errBox) {
+                errBox.textContent = err.message;
+                errBox.classList.remove('hidden');
+              }
+            } finally {
+              if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Salvar';
+              }
+            }
+          });
+        }
+
+        // Confirmação de Exclusão
+        const btnConfirmDelete = document.getElementById('btn-confirm-delete');
+        if (btnConfirmDelete) {
+          btnConfirmDelete.addEventListener('click', async () => {
+            if (currentConfirmCallback) {
+              const fn = currentConfirmCallback;
+              currentConfirmCallback = null;
+              await fn();
+            }
+          });
+        }
+
+        // Impressão da Ficha da SAPZ
+        const btnPrintSapz = document.getElementById('btn-print-sapz');
+        if (btnPrintSapz) {
+          btnPrintSapz.addEventListener('click', () => window.print());
+        }
+
+        // Restaura sessão se já houver token e usuário válidos salvos
+        if (AppState.token && AppState.user) {
+          enterApp(AppState.token, AppState.user);
+        }
+      } catch (initErr) {
+        showAuthAlert('login', `Erro ao inicializar interface: ${initErr.message}`, 'error');
+      }
+    });
+  </script>
 </body>
 </html>
